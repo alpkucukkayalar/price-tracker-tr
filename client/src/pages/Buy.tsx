@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getBuyIntent, approveBuyIntent, resolveBuyIntent, type BuyIntentView } from '../api';
+import { formatMoney } from '../lib/money'
 
 type State =
   | { kind: 'loading' }
@@ -52,8 +53,8 @@ export default function Buy() {
     <div className="max-w-md mx-auto p-6 space-y-4">
       <h1 className="text-xl font-semibold">🛒 {tracker.name}</h1>
       <div className="rounded-lg border p-4 space-y-1">
-        <div>Price: <strong>${intent.price_at_arm.toFixed(2)}</strong></div>
-        <div className="text-sm text-gray-500">Your limit: ${intent.threshold_at_arm.toFixed(2)} · Qty {intent.quantity}</div>
+        <div>Price: <strong>{formatMoney(intent.price_at_arm)}</strong></div>
+        <div className="text-sm text-gray-500">Your limit: {formatMoney(intent.threshold_at_arm)} · Qty {intent.quantity}</div>
         <div className="text-sm text-gray-500">Status: {intent.status}</div>
       </div>
 

@@ -12,6 +12,7 @@ import {
 import type { NotificationHistoryRow } from '../api'
 import type { Tracker, TrackerUrl, TrackerUrlCondition, PriceRecord, Overlap, Purchase } from '../types'
 import { PriceContextCard } from '../components/PriceContextCard'
+import { CampaignCard } from '../components/CampaignCard'
 import PurchaseModal from '../components/PurchaseModal'
 import PurchasedBanner from '../components/PurchasedBanner'
 
@@ -38,6 +39,7 @@ function conditionLabel(c: TrackerUrlCondition): string {
 import StatusBadge from '../components/StatusBadge'
 import { AIInsightsCard } from '../components/AIInsightsCard'
 import useTitle from '../useTitle'
+import { formatMoney } from '../lib/money'
 
 // PriceChart pulls in recharts (~180 KB). Lazy load it so the initial
 // TrackerDetail render can paint everything else while recharts streams
@@ -392,7 +394,7 @@ export default function TrackerDetail() {
           <div className="bg-bg rounded-lg p-3">
             <div className="text-xs text-text-muted mb-1">Current Price</div>
             <div className="text-xl font-bold">
-              {tracker.last_price != null ? `$${tracker.last_price.toFixed(2)}` : '--'}
+              {tracker.last_price != null ? `${formatMoney(tracker.last_price)}` : '--'}
             </div>
           </div>
           <div className="bg-bg rounded-lg p-3">
@@ -407,7 +409,7 @@ export default function TrackerDetail() {
               />
             ) : (
               <div className="text-xl font-bold text-warning">
-                {tracker.threshold_price ? `$${tracker.threshold_price.toFixed(2)}` : '--'}
+                {tracker.threshold_price ? `${formatMoney(tracker.threshold_price)}` : '--'}
               </div>
             )}
           </div>
@@ -437,7 +439,7 @@ export default function TrackerDetail() {
           <div className="bg-bg rounded-lg p-3">
             <div className="text-xs text-text-muted mb-1">All-Time Low</div>
             <div className="text-xl font-bold text-success">
-              {allTimeLow ? `$${allTimeLow.price.toFixed(2)}` : '--'}
+              {allTimeLow ? `${formatMoney(allTimeLow.price)}` : '--'}
             </div>
             {allTimeLow && (
               <div className="text-[10px] text-text-muted mt-0.5">
@@ -564,7 +566,7 @@ export default function TrackerDetail() {
                       </select>
                     </td>
                     <td className="py-2 text-right font-medium whitespace-nowrap">
-                      {s.last_price != null ? `$${s.last_price.toFixed(2)}` : '--'}
+                      {s.last_price != null ? `${formatMoney(s.last_price)}` : '--'}
                     </td>
                     <td className="py-2 pl-4 text-text-muted whitespace-nowrap">
                       {timeAgo(s.last_checked_at)}
@@ -802,13 +804,15 @@ export default function TrackerDetail() {
             && overlap.communityLow < tracker.last_price && (
               <div className="inline-flex items-center gap-1 text-sm text-success bg-success/10 rounded-full px-2.5 py-1 mt-3">
                 <TrendingDown className="w-4 h-4" />
-                Community low: ${overlap.communityLow.toFixed(2)}
+                Community low: {formatMoney(overlap.communityLow)}
               </div>
             )}
         </div>
       )}
 
       <AIInsightsCard tracker={tracker} />
+
+      <CampaignCard tracker={tracker} />
 
       <PriceContextCard tracker={tracker} onTrackerUpdated={setTracker} />
 
@@ -872,7 +876,7 @@ export default function TrackerDetail() {
                     <td className="py-2 text-text-muted">
                       {new Date(p.scraped_at.includes('Z') ? p.scraped_at : p.scraped_at + 'Z').toLocaleString()}
                     </td>
-                    <td className="py-2 text-right font-medium">${p.price.toFixed(2)}</td>
+                    <td className="py-2 text-right font-medium">{formatMoney(p.price)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -925,8 +929,8 @@ export default function TrackerDetail() {
                       </td>
                       <td className="py-2 pl-4 text-text-muted">{sellerHost}</td>
                       <td className="py-2 pl-4 text-text-muted capitalize">{a.channel || 'unknown'}</td>
-                      <td className="py-2 text-right font-medium">${a.price.toFixed(2)}</td>
-                      <td className="py-2 text-right text-success">${(a.threshold_price - a.price).toFixed(2)}</td>
+                      <td className="py-2 text-right font-medium">{formatMoney(a.price)}</td>
+                      <td className="py-2 text-right text-success">{formatMoney((a.threshold_price - a.price))}</td>
                     </tr>
                   )
                 })}

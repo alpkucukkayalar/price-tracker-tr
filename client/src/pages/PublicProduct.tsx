@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
 import { getPublicProduct, type PublicProduct } from '../api';
+import { formatMoney } from '../lib/money'
 
 // Lazy-load PriceChart so the recharts bundle doesn't pull into the
 // public-page initial paint until the data arrives.
@@ -28,7 +29,7 @@ function setMeta(name: string, content: string): void {
 
 function formatPrice(value: number | null): string {
   if (value === null) return '—';
-  return `$${value.toFixed(2)}`;
+  return `${formatMoney(value)}`;
 }
 
 function formatDate(value: string | null): string {

@@ -28,6 +28,7 @@ import { faviconRouter } from './routes/favicon.js';
 import { startScheduler, stopScheduler } from './scheduler/cron.js';
 import { startBackfillCron, stopBackfillCron } from './ai/backfill-cron.js';
 import { startDigestCron, stopDigestCron } from './digest/cron.js';
+import { startCampaignReportCron, stopCampaignReportCron } from './campaign/report.js';
 import { closeBrowser } from './scraper/browser.js';
 import { getUserCount, deleteExpiredRefreshTokens } from './db/user-queries.js';
 import { initSettingsCrypto } from './crypto/settings-crypto.js';
@@ -48,8 +49,9 @@ logger.info('Database initialized');
 const userCount = getUserCount();
 if (userCount === 0) {
   const token = generateSetupToken();
-  const baseUrl = config.isProduction
-    ? 'https://prices.schultzsolutions.tech'
+  // PUBLIC_URL (fork): self-hosters see their own address, not upstream's.
+  const baseUrl = process.env.PUBLIC_URL
+    ? process.env.PUBLIC_URL.replace(/\/$/, '')
     : `http://localhost:${config.port}`;
   logger.info('==========================================================');
   logger.info('FIRST-RUN SETUP: No users found. Create your admin account:');
@@ -70,7 +72,7 @@ app.set('trust proxy', 1);
 
 // CORS - lock down in production
 app.use(cors({
-  origin: config.isProduction ? 'https://prices.schultzsolutions.tech' : true,
+  origin: config.isProduction ? (process.env.PUBLIC_URL || 'https://prices.schultzsolutions.tech').replace(/\/$/, '') : true,
   credentials: true,
 }));
 app.use(express.json());
@@ -198,6 +200,7 @@ const server = app.listen(config.port, () => {
   startScheduler();
   startBackfillCron();
   startDigestCron();
+  startCampaignReportCron();
 });
 
 // Periodic cleanup of expired refresh tokens (every hour)
@@ -211,6 +214,7 @@ function shutdown() {
   stopScheduler();
   stopBackfillCron();
   stopDigestCron();
+  stopCampaignReportCron();
   clearInterval(cleanupInterval);
   server.close(() => {
     closeBrowser().then(() => {

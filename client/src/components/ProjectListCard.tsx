@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { Project, BasketMember } from '../types';
 import { deriveBasketTotal, deriveCompositeVerdict } from '../lib/basket';
 import { VerdictPill } from './VerdictPill';
+import { formatMoney } from '../lib/money'
 
 interface Props {
   project: Project;
@@ -34,7 +35,7 @@ export function ProjectListCard({ project, members, lastAlertAt }: Props) {
       </div>
       <div className="text-sm text-text-muted mb-2">
         {members.length} {members.length === 1 ? 'item' : 'items'} ·{' '}
-        {total !== null ? `$${total.toFixed(2)}` : '—'} / ${project.target_total.toFixed(2)} target
+        {total !== null ? `${formatMoney(total)}` : '—'} / {formatMoney(project.target_total)} target
       </div>
       <div className="w-full h-2 bg-bg rounded overflow-hidden mb-2">
         <div

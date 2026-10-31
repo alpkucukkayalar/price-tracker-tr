@@ -7,6 +7,7 @@ import { BasketTotalCard } from '../components/BasketTotalCard';
 import { BasketMembersTable } from '../components/BasketMembersTable';
 import { AddTrackerModal } from '../components/AddTrackerModal';
 import { RecentAlertsSection } from '../components/RecentAlertsSection';
+import { formatMoney } from '../lib/money'
 
 export default function ProjectDetailPage() {
   const { id: idParam } = useParams<{ id: string }>();
@@ -113,7 +114,7 @@ export default function ProjectDetailPage() {
                 />
               ) : (
                 <span className="cursor-pointer" onClick={() => setEditingTarget(true)}>
-                  ${data.project.target_total.toFixed(2)}
+                  {formatMoney(data.project.target_total)}
                 </span>
               )}
             </div>

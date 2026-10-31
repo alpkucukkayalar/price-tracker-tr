@@ -24,5 +24,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     globals: false,
+    // Upstream tests assert US-dollar copy; the Turkish fork defaults to TRY.
+    env: { VITE_DISPLAY_CURRENCY: 'USD' },
   },
 })

@@ -2,6 +2,7 @@ import { useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import confetti from 'canvas-confetti'
 import type { SavingsTier } from '../lib/savings-tiers'
+import { formatMoney } from '../lib/money'
 
 interface Props {
   tier: SavingsTier
@@ -84,7 +85,7 @@ export default function SavingsCelebration({ tier, saying, savingsAmount, onDism
             {saying}
           </div>
           <div className={`mt-3 ${tier >= 6 ? 'text-2xl sm:text-3xl text-success font-extrabold' : 'text-lg text-success font-semibold'}`}>
-            ${savingsAmount.toFixed(2)} in potential savings
+            {formatMoney(savingsAmount)} in potential savings
           </div>
           <div className="text-[11px] text-text-muted mt-4">
             Click anywhere to dismiss

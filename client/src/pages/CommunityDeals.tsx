@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, ArrowRight } from 'lucide-react';
 import { getCommunityDeals, type DealFeedEntry } from '../api';
+import { formatMoney } from '../lib/money'
 
 /**
  * Imperatively set <title> + <meta> tags. Same pattern as PublicProduct —
@@ -27,7 +28,7 @@ function fmtHoursAgo(hours: number): string {
 }
 
 function fmtPrice(value: number): string {
-  return `$${value.toFixed(2)}`;
+  return `${formatMoney(value)}`;
 }
 
 type LoadState =

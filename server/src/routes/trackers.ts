@@ -13,6 +13,7 @@ import { checkTracker, checkTrackerUrl } from '../scheduler/cron.js';
 import { getDailyMinHistoryForTracker, getRecentLowTiers, getTrackerIdByNormalizedUrl, getCampaignDailyHistory } from '../db/queries.js';
 import { analyzeCampaign } from '../campaign/analysis.js';
 import { getCampaign, istanbulToday } from '../campaign/config.js';
+import { runCampaignReportForUser, type ReportKind } from '../campaign/report.js';
 import { detectTurkishRetailer } from '../scraper/turkish-retailers.js';
 import { normalizeTrackerUrl } from '../lib/normalize-url.js';
 import {
@@ -113,6 +114,17 @@ router.get('/campaign', (req: Request, res: Response) => {
       analysis: analyzeCampaign(getCampaignDailyHistory(t.id), campaign, today),
     })),
   });
+});
+
+// Send a campaign report now (for testing the notification channel).
+router.post('/campaign/report', async (req: Request, res: Response) => {
+  const kind = String(req.query.kind || req.body?.kind || 'daily') as ReportKind;
+  if (!['hike', 'daily', 'final'].includes(kind)) {
+    res.status(400).json({ error: 'kind must be hike, daily or final' });
+    return;
+  }
+  const result = await runCampaignReportForUser(req.user!.userId, new Date(), { force: kind });
+  res.json({ result });
 });
 
 router.get('/sparklines', (req: Request, res: Response) => {

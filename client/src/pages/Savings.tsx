@@ -3,6 +3,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { getPublicSavings } from '../api';
 import type { SavingsSummary } from '../types';
 import useTitle from '../useTitle';
+import { displayCurrency, formatMoney, formatMoneyAxis } from '../lib/money'
 
 /**
  * Public-facing cumulative-savings page. Backed by
@@ -56,7 +57,9 @@ export default function Savings() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-12 text-center">
       <div className="text-5xl sm:text-6xl font-bold text-success tracking-tight">
-        ${data.total_saved.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        {displayCurrency() === 'USD'
+          ? `$${data.total_saved.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          : formatMoney(data.total_saved)}
       </div>
       <div className="text-text-muted mt-3">
         saved across {data.purchase_count} purchases since {since}
@@ -70,7 +73,7 @@ export default function Savings() {
               stroke="#64748b"
               fontSize={12}
               tickLine={false}
-              tickFormatter={(v: number) => `$${v}`}
+              tickFormatter={(v: number) => formatMoneyAxis(v)}
             />
             <Tooltip
               contentStyle={{
@@ -80,7 +83,7 @@ export default function Savings() {
                 color: '#f1f5f9',
                 fontSize: '13px',
               }}
-              formatter={(v: unknown) => [`$${Number(v).toFixed(2)}`, 'Cumulative']}
+              formatter={(v: unknown) => [`${formatMoney(Number(v))}`, 'Cumulative']}
             />
             <Area type="monotone" dataKey="cumulative" stroke="#22c55e" fill="#22c55e33" strokeWidth={2} />
           </AreaChart>

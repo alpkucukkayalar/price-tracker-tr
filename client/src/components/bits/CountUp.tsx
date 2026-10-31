@@ -8,12 +8,14 @@ interface Props {
   decimals?: number
   durationMs?: number
   className?: string
+  /** Custom formatter (e.g. formatMoney); overrides prefix/decimals. */
+  format?: (n: number) => string
 }
 
 const prefersReducedMotion = () =>
   typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export default function CountUp({ value, prefix = '', decimals = 0, durationMs = 600, className }: Props) {
+export default function CountUp({ value, prefix = '', decimals = 0, durationMs = 600, className, format }: Props) {
   const [display, setDisplay] = useState(() => (prefersReducedMotion() ? value : 0))
   const frame = useRef<number | null>(null)
 
@@ -37,5 +39,5 @@ export default function CountUp({ value, prefix = '', decimals = 0, durationMs =
     return () => { if (frame.current) cancelAnimationFrame(frame.current) }
   }, [value, durationMs])
 
-  return <span className={className}>{prefix}{display.toFixed(decimals)}</span>
+  return <span className={className}>{format ? format(display) : `${prefix}${display.toFixed(decimals)}`}</span>
 }

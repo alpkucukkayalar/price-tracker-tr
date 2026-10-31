@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { Tracker } from '../types';
+import { formatMoney } from '../lib/money'
 
 /**
  * Convert a raw URL string (the server aliases `tracker_urls.url AS
@@ -145,7 +146,7 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
         )}
 
         <div className="bg-bg rounded-lg px-3 py-2 my-4 text-sm text-text-muted">
-          Estimated savings: <span className="font-semibold text-success">${estimated.toFixed(2)}</span>
+          Estimated savings: <span className="font-semibold text-success">{formatMoney(estimated)}</span>
         </div>
 
         <label className="flex items-center gap-2 text-sm text-text mb-4">

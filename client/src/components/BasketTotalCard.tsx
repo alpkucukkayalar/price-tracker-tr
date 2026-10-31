@@ -1,6 +1,7 @@
 import type { Project, BasketMember } from '../types';
 import { deriveBasketTotal, deriveCompositeVerdict } from '../lib/basket';
 import { VerdictPill } from './VerdictPill';
+import { formatMoney } from '../lib/money'
 
 interface Props {
   project: Project;
@@ -18,14 +19,14 @@ export function BasketTotalCard({ project, members }: Props) {
       <div className="flex flex-wrap items-center gap-3 mb-3">
         <VerdictPill tier={verdict} reason={null} size="md" />
         <div className="text-2xl font-bold">
-          {total !== null ? `$${total.toFixed(2)}` : '—'}{' '}
+          {total !== null ? `${formatMoney(total)}` : '—'}{' '}
           <span className="text-base font-normal text-text-muted">
-            / ${project.target_total.toFixed(2)}
+            / {formatMoney(project.target_total)}
           </span>
         </div>
         {gap !== null && (
           <div className={`text-sm font-medium ${gap > 0 ? 'text-warning' : 'text-success'}`}>
-            {gap > 0 ? `▲ $${gap.toFixed(2)} over target` : `▼ $${Math.abs(gap).toFixed(2)} under target`}
+            {gap > 0 ? `▲ ${formatMoney(gap)} over target` : `▼ ${formatMoney(Math.abs(gap))} under target`}
           </div>
         )}
       </div>

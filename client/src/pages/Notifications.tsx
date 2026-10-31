@@ -4,6 +4,7 @@ import { Bell, MessageSquare, Webhook, HelpCircle, Inbox } from 'lucide-react'
 import { getNotificationHistory, markNotificationsRead, type NotificationHistoryRow } from '../api'
 import { NOTIFICATIONS_READ_EVENT } from '../useNotificationCount'
 import useTitle from '../useTitle'
+import { formatMoney } from '../lib/money'
 
 function formatDateTime(s: string): string {
   const d = new Date(s.includes('Z') ? s : s + 'Z')
@@ -117,9 +118,9 @@ export default function NotificationsPage() {
                       </td>
                       <td className="px-4 py-3 text-text-muted">{sellerHost}</td>
                       <td className="px-4 py-3"><ChannelBadge channel={r.channel} /></td>
-                      <td className="px-4 py-3 text-right font-semibold">${r.price.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right text-text-muted">${r.threshold_price.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right text-success">${savings.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-semibold">{formatMoney(r.price)}</td>
+                      <td className="px-4 py-3 text-right text-text-muted">{formatMoney(r.threshold_price)}</td>
+                      <td className="px-4 py-3 text-right text-success">{formatMoney(savings)}</td>
                     </tr>
                   )
                 })}

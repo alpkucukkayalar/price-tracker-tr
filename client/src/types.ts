@@ -258,3 +258,65 @@ export interface SavingsSummary {
 export function savedAmount(p: Pick<Purchase, 'first_price' | 'purchase_price' | 'quantity'>): number {
   return Math.max(0, (p.first_price - p.purchase_price) * p.quantity);
 }
+
+// --- Efsane Cuma / Black Friday campaign analysis (Turkish fork) ---
+export type TurkishRetailer = 'trendyol' | 'hepsiburada' | 'amazon_tr' | 'n11'
+export type CampaignVerdict =
+  | 'collecting'
+  | 'insufficient_data'
+  | 'real_discount'
+  | 'inflated_discount'
+  | 'fake_discount'
+  | 'no_discount'
+  | 'price_increased'
+
+export interface CampaignConfig {
+  name: string
+  start: string
+  end: string
+}
+
+export interface CampaignAnalysis {
+  campaign: CampaignConfig
+  phase: 'before' | 'during' | 'after'
+  verdict: CampaignVerdict
+  headline: string
+  details: string[]
+  reference30dLow: number | null
+  baselineMedian: number | null
+  runupPeak: number | null
+  runupPct: number | null
+  campaignLow: number | null
+  campaignLowDate: string | null
+  realDiscountPct: number | null
+  claimedDiscountPct: number | null
+  apparentDiscountPct: number | null
+  coverageDays: number
+  preCampaignHikeWarning: boolean
+  daysUntilStart: number
+}
+
+export interface CampaignDailyRow {
+  date: string
+  price: number
+  listPrice: number | null
+}
+
+export interface TrackerCampaign {
+  retailer: TurkishRetailer | null
+  history: CampaignDailyRow[]
+  analysis: CampaignAnalysis
+}
+
+export interface CampaignOverview {
+  campaign: CampaignConfig
+  today: string
+  trackers: Array<{
+    id: number
+    name: string
+    url: string
+    retailer: TurkishRetailer | null
+    last_price: number | null
+    analysis: CampaignAnalysis
+  }>
+}
