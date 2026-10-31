@@ -3,6 +3,7 @@ import type { Project, BasketMember } from '../types';
 import { deriveBasketTotal, deriveCompositeVerdict } from '../lib/basket';
 import { VerdictPill } from './VerdictPill';
 import { formatMoney } from '../lib/money'
+import { t, ago } from '../lib/i18n'
 
 interface Props {
   project: Project;
@@ -13,10 +14,10 @@ interface Props {
 function formatRelative(iso: string): string {
   const ms = Date.now() - new Date(iso + 'Z').getTime();
   const min = Math.round(ms / 60000);
-  if (min < 60) return `${min}m ago`;
+  if (min < 60) return ago(min, 'm');
   const hr = Math.round(min / 60);
-  if (hr < 48) return `${hr}h ago`;
-  return `${Math.round(hr / 24)}d ago`;
+  if (hr < 48) return ago(hr, 'h');
+  return ago(Math.round(hr / 24), 'd');
 }
 
 export function ProjectListCard({ project, members, lastAlertAt }: Props) {
@@ -35,7 +36,7 @@ export function ProjectListCard({ project, members, lastAlertAt }: Props) {
       </div>
       <div className="text-sm text-text-muted mb-2">
         {members.length} {members.length === 1 ? 'item' : 'items'} ·{' '}
-        {total !== null ? `${formatMoney(total)}` : '—'} / {formatMoney(project.target_total)} target
+        {total !== null ? `${formatMoney(total)}` : '—'} / {formatMoney(project.target_total)} {t('target')}
       </div>
       <div className="w-full h-2 bg-bg rounded overflow-hidden mb-2">
         <div
@@ -44,7 +45,7 @@ export function ProjectListCard({ project, members, lastAlertAt }: Props) {
         />
       </div>
       <div className="text-xs text-text-muted">
-        {lastAlertAt ? `Last alert: ${formatRelative(lastAlertAt)}` : 'No alerts yet'}
+        {lastAlertAt ? `Last alert: ${formatRelative(lastAlertAt)}` : t('No alerts yet')}
       </div>
     </Link>
   );

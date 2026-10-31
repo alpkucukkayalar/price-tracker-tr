@@ -5,6 +5,7 @@ import {
   getWishlistShareToken,
   rotateWishlistShareTokenApi,
 } from '../api';
+import { t } from '../lib/i18n'
 
 /**
  * Settings card for the Wishlist / gift mode feature. Shows:
@@ -41,7 +42,7 @@ export function WishlistCard() {
   }, []);
 
   async function handleRotate() {
-    if (!confirm('Generate a new share link? The current link will stop working.')) return;
+    if (!confirm(t('Generate a new share link? The current link will stop working.'))) return;
     setBusy(true);
     setError(null);
     try {
@@ -65,12 +66,11 @@ export function WishlistCard() {
     <section className="bg-surface border border-border rounded-xl p-4 sm:p-6">
       <header className="flex items-center justify-between mb-3">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <Gift className="w-5 h-5 text-primary" /> Wishlist
+          <Gift className="w-5 h-5 text-primary" /> {t('Wishlist')}
         </h2>
       </header>
       <p className="text-text-muted text-sm mb-4">
-        Share with gift-givers. They can see prices and claim items, but you'll
-        never know which.
+        {t('Share with gift-givers. They can see prices and claim items, but you\'ll never know which.')}
       </p>
 
       {error && <div className="text-danger text-sm mb-2">{error}</div>}
@@ -78,7 +78,7 @@ export function WishlistCard() {
       {shareUrl && (
         <>
           <label className="block text-sm font-medium text-text-muted mb-1.5">
-            Share link
+            {t('Share link')}
           </label>
           <div className="flex gap-2 mb-3">
             <input
@@ -90,25 +90,25 @@ export function WishlistCard() {
             <button
               onClick={handleCopy}
               className="flex items-center gap-1 px-3 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors"
-              title="Copy share link"
+              title={t('Copy share link')}
             >
               <Copy className="w-4 h-4" />
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? 'Copied!' : t('Copy')}
             </button>
           </div>
 
           <div className="flex items-center justify-between flex-wrap gap-2">
             <p className="text-text-muted text-sm">
-              {count} {count === 1 ? 'item' : 'items'} on your wishlist
+              {count} {count === 1 ? 'item' : 'items'} {t('on your wishlist')}
             </p>
             <button
               onClick={handleRotate}
               disabled={busy}
               className="flex items-center gap-1 text-sm text-text-muted hover:text-danger disabled:opacity-50"
-              title="Generate a new link and invalidate the current one"
+              title={t('Generate a new link and invalidate the current one')}
             >
               <RefreshCw className={`w-4 h-4 ${busy ? 'animate-spin' : ''}`} />
-              Rotate link
+              {t('Rotate link')}
             </button>
           </div>
         </>

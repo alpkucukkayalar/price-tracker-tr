@@ -8,6 +8,7 @@ import {
   type InviteQuota,
 } from '../api';
 import type { InviteCode } from '../types';
+import { t, uiLocale } from '../lib/i18n'
 
 /**
  * Per-user invites card. Visible to all authenticated users on Settings.
@@ -48,7 +49,7 @@ export function InvitesCard() {
     } catch (e) {
       setError(
         String(e) === 'Error: QUOTA_REACHED'
-          ? 'Quota reached.'
+          ? t('Quota reached.')
           : String(e),
       );
     } finally {
@@ -57,7 +58,7 @@ export function InvitesCard() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm('Revoke this invite?')) return;
+    if (!confirm(t('Revoke this invite?'))) return;
     try {
       await deleteMyInvite(id);
       await refresh();
@@ -80,21 +81,21 @@ export function InvitesCard() {
     <section className="bg-surface border border-border rounded-xl p-4 sm:p-6">
       <header className="flex items-center justify-between mb-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold">
-          <Mail className="w-5 h-5 text-primary" /> Invites
+          <Mail className="w-5 h-5 text-primary" /> {t('Invites')}
         </h2>
         <button
           onClick={handleCreate}
           disabled={busy || !canGenerate}
           className="text-sm bg-primary hover:bg-primary-dark text-white px-3 py-1.5 rounded disabled:opacity-50"
         >
-          Generate invite link
+          {t('Generate invite link')}
         </button>
       </header>
 
       {quota && (
         <p className="text-text-muted text-sm mb-3">
           {isAdmin
-            ? 'Unlimited (admin)'
+            ? t('Unlimited (admin)')
             : `Used: ${quota.used} of ${quota.default} · ${remaining} remaining`}
         </p>
       )}
@@ -102,7 +103,7 @@ export function InvitesCard() {
       {error && <div className="text-danger text-sm mb-2">{error}</div>}
 
       {invites.length === 0 ? (
-        <p className="text-text-muted text-sm">No active invites.</p>
+        <p className="text-text-muted text-sm">{t('No active invites.')}</p>
       ) : (
         <ul className="divide-y divide-border">
           {invites.map((inv) => (
@@ -110,21 +111,21 @@ export function InvitesCard() {
               <code className="text-text-muted text-xs">{inv.code}</code>
               {inv.expires_at && (
                 <span className="text-text-muted text-xs">
-                  expires {new Date(inv.expires_at + 'Z').toLocaleDateString()}
+                  {t('expires')} {new Date(inv.expires_at + 'Z').toLocaleDateString(uiLocale())}
                 </span>
               )}
               <span className="flex-1" />
               <button
                 onClick={() => copyLink(inv.code)}
                 className="text-text-muted hover:text-primary text-xs flex items-center gap-1"
-                title="Copy invite link"
+                title={t('Copy invite link')}
               >
-                <Copy className="w-3 h-3" /> Copy
+                <Copy className="w-3 h-3" /> {t('Copy')}
               </button>
               <button
                 onClick={() => handleDelete(inv.id)}
                 className="text-text-muted hover:text-danger text-sm"
-                title="Revoke"
+                title={t('Revoke')}
               >
                 <X className="w-4 h-4" />
               </button>

@@ -20,7 +20,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       if (!retryRes.ok) {
         if (retryRes.status === 401) {
           window.location.href = '/login';
-          throw new Error('Session expired');
+          throw new Error(t('Session expired'));
         }
         const body = await retryRes.json().catch(() => ({}));
         throw new Error(body.error?.toString() || `Request failed: ${retryRes.status}`);
@@ -29,7 +29,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       return retryRes.json();
     } else {
       window.location.href = '/login';
-      throw new Error('Session expired');
+      throw new Error(t('Session expired'));
     }
   }
 
@@ -162,6 +162,7 @@ export const markNotificationsRead = () =>
 
 // Seller URLs (tracker_urls)
 import type { TrackerUrl } from './types'
+import { t } from './lib/i18n'
 export const getTrackerUrls = (trackerId: number) =>
   request<TrackerUrl[]>(`/trackers/${trackerId}/urls`);
 export const addTrackerUrl = (

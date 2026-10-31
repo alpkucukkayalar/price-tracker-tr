@@ -58,7 +58,7 @@ rm -rf "$TMP"
 
 # --- 3. Derleme -----------------------------------------------------------------------
 step "Bağımlılıklar ve derleme (5-10 dakika sürebilir)"
-( cd "$APP/server" && npm ci --no-audit --no-fund && npx --yes playwright install chromium && npm run build )
+( cd "$APP/server" && npm ci --no-audit --no-fund && npx playwright install chromium chromium-headless-shell && npm run build )
 ( cd "$APP/client" && npm ci --no-audit --no-fund && VITE_DISPLAY_CURRENCY=TRY npm run build )
 
 # --- 4. .env ----------------------------------------------------------------------------

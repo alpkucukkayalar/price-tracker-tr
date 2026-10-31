@@ -5,6 +5,7 @@ import { getTier, pickSaying, type SavingsTier } from '../lib/savings-tiers'
 import type { DashboardFilter } from '../lib/dashboard-filter'
 import CountUp from './bits/CountUp'
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 // SavingsCelebration pulls in canvas-confetti (~4 KB gzipped but bigger
 // raw). Lazy load so the Dashboard's initial render doesn't pay the cost
@@ -71,7 +72,7 @@ export default function StatCards({ trackers, counts, onSelectFilter }: Props) {
 
   const stats: StatCard[] = [
     {
-      label: 'Active',
+      label: t('Active'),
       count: active,
       icon: Activity,
       color: 'text-primary',
@@ -79,7 +80,7 @@ export default function StatCards({ trackers, counts, onSelectFilter }: Props) {
       onClick: active > 0 ? () => onSelectFilter('active') : undefined,
     },
     {
-      label: 'Below Target',
+      label: t('Below Target'),
       count: belowThreshold,
       icon: TrendingDown,
       color: 'text-success',
@@ -87,7 +88,7 @@ export default function StatCards({ trackers, counts, onSelectFilter }: Props) {
       onClick: belowThreshold > 0 ? () => onSelectFilter('below-target') : undefined,
     },
     {
-      label: 'Errors',
+      label: t('Errors'),
       count: errors,
       icon: AlertCircle,
       color: errors > 0 ? 'text-danger' : 'text-text-muted',
@@ -95,7 +96,7 @@ export default function StatCards({ trackers, counts, onSelectFilter }: Props) {
       onClick: errors > 0 ? () => onSelectFilter('errors') : undefined,
     },
     {
-      label: 'Potential Savings',
+      label: t('Potential Savings'),
       count: totalSavings,
       icon: DollarSign,
       color: 'text-warning',
@@ -137,7 +138,7 @@ export default function StatCards({ trackers, counts, onSelectFilter }: Props) {
                 type="button"
                 onClick={s.onClick}
                 className="text-left w-full p-0 bg-transparent border-0 block"
-                title={s.isSavings ? 'Celebrate your savings' : `View all ${s.label.toLowerCase()} trackers`}
+                title={s.isSavings ? t('Celebrate your savings') : `View all ${s.label.toLowerCase()} trackers`}
               >
                 {body}
               </button>

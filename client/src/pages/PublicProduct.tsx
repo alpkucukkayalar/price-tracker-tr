@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
 import { getPublicProduct, type PublicProduct } from '../api';
 import { formatMoney } from '../lib/money'
+import { t, uiLocale } from '../lib/i18n'
 
 // Lazy-load PriceChart so the recharts bundle doesn't pull into the
 // public-page initial paint until the data arrives.
@@ -37,7 +38,7 @@ function formatDate(value: string | null): string {
   // value is ISO YYYY-MM-DD or YYYY-MM-DD HH:MM:SS — both parse natively.
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString(uiLocale(), { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 type LoadState =
@@ -64,7 +65,7 @@ export default function PublicProductPage() {
         if (err instanceof Error && err.message === 'NOT_FOUND') {
           setState({ kind: 'not-found' });
         } else {
-          setState({ kind: 'error', message: err instanceof Error ? err.message : 'Unknown error' });
+          setState({ kind: 'error', message: err instanceof Error ? err.message : t('Unknown error') });
         }
       });
     return () => { cancelled = true; };
@@ -88,13 +89,13 @@ export default function PublicProductPage() {
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-lg font-bold text-text no-underline">
             <BarChart3 className="w-6 h-6 text-primary" />
-            Price Tracker
+            {t('Price Tracker')}
           </Link>
           <Link
             to="/login"
             className="text-sm text-primary hover:underline"
           >
-            Sign in
+            {t('Sign in')}
           </Link>
         </div>
       </header>
@@ -105,15 +106,15 @@ export default function PublicProductPage() {
         )}
         {state.kind === 'not-found' && (
           <div className="bg-surface border border-border rounded-xl p-8 text-center">
-            <h1 className="text-xl font-semibold text-text mb-2">Product not found</h1>
+            <h1 className="text-xl font-semibold text-text mb-2">{t('Product not found')}</h1>
             <p className="text-text-muted text-sm">
-              The product you're looking for doesn't exist or hasn't been tracked yet.
+              {t('The product you\'re looking for doesn\'t exist or hasn\'t been tracked yet.')}
             </p>
           </div>
         )}
         {state.kind === 'error' && (
           <div className="bg-danger/10 border border-danger/30 text-danger rounded-xl p-4 text-sm">
-            Something went wrong loading this page. ({state.message})
+            {t('Something went wrong loading this page. (')}{state.message})
           </div>
         )}
         {state.kind === 'ready' && <ProductView product={state.product} />}
@@ -142,27 +143,26 @@ function ProductView({ product }: { product: PublicProduct }) {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Current low" value={formatPrice(product.lowest_current_price)} />
-        <StatCard label="All-time low" value={formatPrice(product.lowest_ever_price)} />
-        <StatCard label="Samples" value={String(product.sample_count)} />
-        <StatCard label="First seen" value={formatDate(product.first_observed)} />
+        <StatCard label={t('Current low')} value={formatPrice(product.lowest_current_price)} />
+        <StatCard label={t('All-time low')} value={formatPrice(product.lowest_ever_price)} />
+        <StatCard label={t('Samples')} value={String(product.sample_count)} />
+        <StatCard label={t('First seen')} value={formatDate(product.first_observed)} />
       </div>
 
       <div className="bg-surface border border-border rounded-xl p-4">
-        <h2 className="text-sm font-semibold text-text-muted mb-3">Price history (daily)</h2>
-        <Suspense fallback={<div className="flex items-center justify-center h-64 text-text-muted text-sm">Loading chart…</div>}>
+        <h2 className="text-sm font-semibold text-text-muted mb-3">{t('Price history (daily)')}</h2>
+        <Suspense fallback={<div className="flex items-center justify-center h-64 text-text-muted text-sm">{t('Loading chart…')}</div>}>
           <PriceChart data={chartData} />
         </Suspense>
       </div>
 
       <p className="text-xs text-text-muted">
-        Aggregated daily-low across all sellers tracked by Price Tracker users. Want
-        alerts for this product? <Link to="/login" className="text-primary hover:underline">Sign in</Link>.
+        {t('Aggregated daily-low across all sellers tracked by Price Tracker users. Want alerts for this product?')} <Link to="/login" className="text-primary hover:underline">{t('Sign in')}</Link>.
       </p>
 
       <div className="mt-6 pt-4 border-t border-border text-center">
         <Link to="/deals" className="text-text-muted hover:text-primary text-sm">
-          See trending deals across the community →
+          {t('See trending deals across the community →')}
         </Link>
       </div>
     </div>

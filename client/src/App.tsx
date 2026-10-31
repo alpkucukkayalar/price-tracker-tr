@@ -27,6 +27,7 @@ import Setup from './pages/Setup'
 // since the entire route IS the page; no benefit to a chunk split here.
 import PublicProduct from './pages/PublicProduct'
 import AffiliateDisclosure from './components/AffiliateDisclosure'
+import { t } from './lib/i18n'
 
 // Community deals — anonymous /deals public feed. Lazy-loaded since most
 // users hit the dashboard first; the deal feed is a secondary entry point.
@@ -54,7 +55,7 @@ const Buy = lazy(() => import('./pages/Buy'))
 // Shared loading fallback for lazy routes. Matches the inline "Loading..."
 // style the pages themselves use so the transition is visually smooth.
 function RouteFallback() {
-  return <div className="flex items-center justify-center h-64 text-text-muted">Loading...</div>
+  return <div className="flex items-center justify-center h-64 text-text-muted">{t('Loading...')}</div>
 }
 
 // The drawer's Notifications entry — a component (not a navLink call) so the
@@ -72,7 +73,7 @@ function DrawerNotificationsLink() {
         ${active ? 'bg-primary text-white' : 'text-text-muted hover:text-text hover:bg-surface-hover'}`}
     >
       <Inbox className="w-4 h-4" />
-      Notifications
+      {t('Notifications')}
       {count > 0 && (
         <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-danger text-white text-[10px] font-bold flex items-center justify-center">
           {count > 9 ? '9+' : count}
@@ -137,21 +138,21 @@ function App() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="text-lg font-bold text-text no-underline flex items-center gap-2">
             <BarChart3 className="w-6 h-6 text-primary" />
-            Price Tracker
+            {t('Price Tracker')}
           </Link>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-2">
-            {navLink('/', 'Dashboard', <BarChart3 className="w-4 h-4" />)}
+            {navLink('/', t('Dashboard'), <BarChart3 className="w-4 h-4" />)}
             {navLink('/efsane-cuma', 'Efsane Cuma', <Flame className="w-4 h-4" />)}
-            {navLink('/deals', 'Deals', <TrendingUp className="w-4 h-4" />)}
-            {navLink('/projects', 'Projects', <Package className="w-4 h-4" />)}
+            {navLink('/deals', t('Deals'), <TrendingUp className="w-4 h-4" />)}
+            {navLink('/projects', t('Projects'), <Package className="w-4 h-4" />)}
             <Link
               to="/add"
               className="flex items-center gap-2 px-4 py-2 ml-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors no-underline"
             >
               <Plus className="w-4 h-4" />
-              Add Tracker
+              {t('Add Tracker')}
             </Link>
             <NotificationBell />
             <UserMenu />
@@ -161,7 +162,7 @@ function App() {
           <button
             onClick={() => setMenuOpen(o => !o)}
             className="md:hidden flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={menuOpen ? t('Close menu') : t('Open menu')}
             aria-expanded={menuOpen}
           >
             {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -172,18 +173,18 @@ function App() {
         {menuOpen && (
           <div className="md:hidden border-t border-border bg-surface">
             <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1">
-              {navLink('/', 'Dashboard', <BarChart3 className="w-4 h-4" />)}
+              {navLink('/', t('Dashboard'), <BarChart3 className="w-4 h-4" />)}
               {navLink('/efsane-cuma', 'Efsane Cuma', <Flame className="w-4 h-4" />)}
-              {navLink('/deals', 'Deals', <TrendingUp className="w-4 h-4" />)}
-              {navLink('/projects', 'Projects', <Package className="w-4 h-4" />)}
-              {navLink('/add', 'Add Tracker', <Plus className="w-4 h-4" />)}
+              {navLink('/deals', t('Deals'), <TrendingUp className="w-4 h-4" />)}
+              {navLink('/projects', t('Projects'), <Package className="w-4 h-4" />)}
+              {navLink('/add', t('Add Tracker'), <Plus className="w-4 h-4" />)}
 
               <div className="my-2 border-t border-border" />
 
               <DrawerNotificationsLink />
-              {navLink('/purchased', 'Purchased', <ShoppingBag className="w-4 h-4" />)}
-              {navLink('/settings', 'Settings', <SettingsIcon className="w-4 h-4" />)}
-              {user?.role === 'admin' && navLink('/admin', 'Admin', <Shield className="w-4 h-4" />)}
+              {navLink('/purchased', t('Purchased'), <ShoppingBag className="w-4 h-4" />)}
+              {navLink('/settings', t('Settings'), <SettingsIcon className="w-4 h-4" />)}
+              {user?.role === 'admin' && navLink('/admin', t('Admin'), <Shield className="w-4 h-4" />)}
 
               {user && (
                 <div className="flex items-center justify-between mt-2 pt-3 border-t border-border">
@@ -193,7 +194,7 @@ function App() {
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
-                    Logout
+                    {t('Logout')}
                   </button>
                 </div>
               )}

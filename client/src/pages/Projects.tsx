@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { Project, ProjectDetail } from '../types';
 import { listProjects, getProject, createProject } from '../api';
 import { ProjectListCard } from '../components/ProjectListCard';
+import { t } from '../lib/i18n'
 
 type StatusFilter = 'active' | 'archived';
 
@@ -41,7 +42,7 @@ export default function ProjectsPage() {
     try {
       const target = Number(newTarget);
       if (!newName.trim() || !Number.isFinite(target) || target <= 0) {
-        setError('Name and positive target required');
+        setError(t('Name and positive target required'));
         return;
       }
       const project = await createProject({ name: newName.trim(), target_total: target });
@@ -57,12 +58,12 @@ export default function ProjectsPage() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Projects</h1>
+        <h1 className="text-2xl font-bold">{t('Projects')}</h1>
         <button
           onClick={() => setCreating(c => !c)}
           className="px-3 py-1.5 rounded bg-primary text-white text-sm font-medium hover:opacity-90"
         >
-          {creating ? 'Cancel' : '+ New Project'}
+          {creating ? t('Cancel') : '+ New Project'}
         </button>
       </div>
 
@@ -82,19 +83,19 @@ export default function ProjectsPage() {
         <form onSubmit={handleCreate} className="bg-surface border border-border rounded-lg p-4 mb-4 space-y-3">
           <input
             autoFocus
-            placeholder="Project name (e.g., NAS Build)"
+            placeholder={t('Project name (e.g., NAS Build)')}
             value={newName}
             onChange={e => setNewName(e.target.value)}
             className="w-full bg-bg border border-border rounded px-3 py-2"
           />
           <input
             type="number" step="0.01" min="0.01"
-            placeholder="Target total ($)"
+            placeholder={t('Target total ($)')}
             value={newTarget}
             onChange={e => setNewTarget(e.target.value)}
             className="w-full bg-bg border border-border rounded px-3 py-2"
           />
-          <button type="submit" className="px-4 py-2 rounded bg-primary text-white font-medium">Create</button>
+          <button type="submit" className="px-4 py-2 rounded bg-primary text-white font-medium">{t('Create')}</button>
         </form>
       )}
 
@@ -102,8 +103,8 @@ export default function ProjectsPage() {
 
       {projects.length === 0 ? (
         <div className="text-center py-12 text-text-muted">
-          No {statusFilter} projects.{' '}
-          <Link to="/" className="text-primary underline">Browse trackers</Link> to add to a project.
+          {t('No')} {statusFilter} projects.{' '}
+          <Link to="/" className="text-primary underline">{t('Browse trackers')}</Link> {t('to add to a project.')}
         </div>
       ) : (
         <div className="space-y-3">

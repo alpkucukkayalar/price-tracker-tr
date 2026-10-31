@@ -1,3 +1,4 @@
+import { L } from '../lib/i18n.js';
 import { formatMoney } from '../lib/money.js';
 import nodemailer, { Transporter } from 'nodemailer';
 import { config, isEmailConfigured } from '../config.js';
@@ -7,8 +8,8 @@ import type { Confidence } from '../ai/confidence.js';
 import { conditionLabel, formatPriceWithCondition } from './condition-label.js';
 
 function emailSubjectPrefix(level: Confidence['level']): string {
-  if (level === 'HIGH') return '[Strong Buy] ';
-  if (level === 'MEDIUM') return '[Good Deal] ';
+  if (level === 'HIGH') return L('[Strong Buy] ', '[Kesin Al] ');
+  if (level === 'MEDIUM') return L('[Good Deal] ', '[İyi Fırsat] ');
   return '';
 }
 
@@ -75,11 +76,11 @@ function priceAlertText(
       `Savings: ${formatMoney(tracker.threshold_price - price)}`,
     );
   }
-  if (low) lines.push(`${low.tier === 'back_in_stock' ? 'Stock' : 'Record'}: ${low.context}`);
+  if (low) lines.push(`${low.tier === 'back_in_stock' ? L('Stock', 'Stok') : L('Record', 'Rekor')}: ${low.context}`);
   lines.push(`Seller: ${hostOf(tracker.url)}`);
   const condLabel = conditionLabel(condition);
   if (condLabel) lines.push(`Condition: ${condLabel}`);
-  lines.push('', `Buy now: ${tracker.url}`);
+  lines.push('', `${L('Buy now: ', 'Hemen al: ')}${tracker.url}`);
   return lines.join('\n');
 }
 
@@ -101,7 +102,7 @@ function priceAlertHtml(
     <tr><td style="color: #6b7280;">Savings</td><td style="font-weight: 600; color: #16a34a;">${formatMoney(tracker.threshold_price - price)}</td></tr>`
     : '';
   const recordRow = low
-    ? `<tr><td style="color: #6b7280;">${low.tier === 'back_in_stock' ? 'Stock' : 'Record'}</td><td style="font-weight: 600;">${escapeHtml(low.context)}</td></tr>`
+    ? `<tr><td style="color: #6b7280;">${low.tier === 'back_in_stock' ? L('Stock', 'Stok') : L('Record', 'Rekor')}</td><td style="font-weight: 600;">${escapeHtml(low.context)}</td></tr>`
     : '';
   const conditionRow = condLabel
     ? `<tr><td style="color: #6b7280;">Condition</td><td style="font-weight: 600;">${escapeHtml(condLabel)}</td></tr>`
@@ -122,19 +123,19 @@ function priceAlertHtml(
 
 function errorAlertText(tracker: Tracker, error: string): string {
   return [
-    `Tracker error: ${tracker.name}`,
+    `${L('Tracker error: ', 'Takip hatası: ')}${tracker.name}`,
     '',
     `${error}`,
     `${tracker.consecutive_failures} consecutive failures.`,
     '',
-    `Tracker URL: ${tracker.url}`,
+    `${L('Tracker URL: ', 'Ürün linki: ')}${tracker.url}`,
   ].join('\n');
 }
 
 function errorAlertHtml(tracker: Tracker, error: string): string {
   return `<!doctype html>
 <html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; max-width: 520px; margin: 0 auto; padding: 24px;">
-  <h2 style="margin: 0 0 8px 0; font-size: 18px;">Tracker error: ${escapeHtml(tracker.name)}</h2>
+  <h2 style="margin: 0 0 8px 0; font-size: 18px;">${L('Tracker error: ', 'Takip hatası: ')}${escapeHtml(tracker.name)}</h2>
   <div style="background: #fef2f2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin: 12px 0;">${escapeHtml(error)}</div>
   <p style="color: #6b7280;">${tracker.consecutive_failures} consecutive failures.</p>
   <a href="${escapeAttr(tracker.url)}" style="color: #2563eb;">Open tracker URL</a>
@@ -166,7 +167,7 @@ export async function sendEmailPriceAlert(
   const textParts: string[] = [baseText];
   if (aiCommentary) textParts.push(aiCommentary);
   if (confidence && confidence.reasons.length > 0) {
-    textParts.push(`About this deal: ${confidence.reasons.join(' · ')}`);
+    textParts.push(`${L('About this deal: ', 'Bu fırsat hakkında: ')}${confidence.reasons.join(' · ')}`);
   }
   const text = textParts.join('\n\n');
 
@@ -196,8 +197,8 @@ export async function sendEmailPriceAlert(
       from: config.smtpFrom,
       to: recipient,
       subject: low && !tracker.threshold_price
-        ? `${subjectPrefix}${low.tier === 'back_in_stock' ? 'Back in stock' : 'Record low'}: ${tracker.name} is ${priceTagged}`
-        : `${subjectPrefix}Price drop: ${tracker.name} is ${priceTagged}`,
+        ? `${subjectPrefix}${low.tier === 'back_in_stock' ? L('Back in stock', 'Tekrar stokta') : L('Record low', 'En düşük fiyat')}: ${tracker.name} ${L('is', '→')} ${priceTagged}`
+        : `${subjectPrefix}${L('Price drop: ', 'Fiyat düştü: ')}${tracker.name} ${L('is', '→')} ${priceTagged}`,
       text,
       html,
     });
@@ -218,7 +219,7 @@ export async function sendEmailErrorAlert(
     await getTransport().sendMail({
       from: config.smtpFrom,
       to: recipient,
-      subject: `Tracker error: ${tracker.name}`,
+      subject: `${L('Tracker error: ', 'Takip hatası: ')}${tracker.name}`,
       text: errorAlertText(tracker, errorMsg),
       html: errorAlertHtml(tracker, errorMsg),
     });
@@ -235,8 +236,8 @@ import type { Project as ProjectType2, BasketState as BasketStateType2, BasketMe
 function basketEmailText(project: ProjectType2, basket: BasketStateType2, members: BasketMemberType2[], aiCommentary?: string | null): string {
   if (basket.total === null) return '';
   const memberLines = members.map(m => `  • ${m.tracker_name} — ${formatMoney(m.last_price ?? 0)}`).join('\n');
-  const base = `Bundle ready: ${project.name}\n\n` +
-    `Total: ${formatMoney(basket.total)} (target ${formatMoney(project.target_total)}, savings ${formatMoney(project.target_total - basket.total)})\n\n` +
+  const base = `${L('Bundle ready: ', 'Sepet hazır: ')}${project.name}\n\n` +
+    `${L('Total', 'Toplam')}: ${formatMoney(basket.total)} (${L('target', 'hedef')} ${formatMoney(project.target_total)}, ${L('savings', 'tasarruf')} ${formatMoney(project.target_total - basket.total)})\n\n` +
     `Items:\n${memberLines}\n`;
   return aiCommentary ? `${base}\n${aiCommentary}\n` : base;
 }
@@ -247,9 +248,9 @@ function basketEmailHtml(project: ProjectType2, basket: BasketStateType2, member
     `<li>${escapeHtml(m.tracker_name)} — <strong>${formatMoney(m.last_price ?? 0)}</strong></li>`
   ).join('');
   const aiBlock = aiCommentary ? `<p><em>${escapeHtml(aiCommentary)}</em></p>` : '';
-  return `<h2>Bundle ready: ${escapeHtml(project.name)}</h2>` +
+  return `<h2>${L('Bundle ready: ', 'Sepet hazır: ')}${escapeHtml(project.name)}</h2>` +
     `<p>Total: <strong>${formatMoney(basket.total)}</strong> ` +
-    `(target ${formatMoney(project.target_total)}, savings ${formatMoney(project.target_total - basket.total)})</p>` +
+    `(${L('target', 'hedef')} ${formatMoney(project.target_total)}, ${L('savings', 'tasarruf')} ${formatMoney(project.target_total - basket.total)})</p>` +
     `<ul>${memberRows}</ul>${aiBlock}`;
 }
 
@@ -265,7 +266,7 @@ export async function sendEmailBasketAlert(
     await getTransport().sendMail({
       from: config.smtpFrom,
       to: recipient,
-      subject: `Bundle ready: ${project.name} hit ${formatMoney(basket.total)}`,
+      subject: `${L('Bundle ready: ', 'Sepet hazır: ')}${project.name} hit ${formatMoney(basket.total)}`,
       text: basketEmailText(project, basket, members, aiCommentary ?? null),
       html: basketEmailHtml(project, basket, members, aiCommentary ?? null),
     });

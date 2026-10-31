@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BarChart3, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { t } from '../lib/i18n'
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,7 +25,7 @@ export default function Login() {
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from && from.startsWith('/') ? from : '/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : t('Login failed'));
     } finally {
       setSubmitting(false);
     }
@@ -35,11 +36,11 @@ export default function Login() {
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 mb-8">
           <BarChart3 className="w-8 h-8 text-primary" />
-          <h1 className="text-2xl font-bold text-text">Price Tracker</h1>
+          <h1 className="text-2xl font-bold text-text">{t('Price Tracker')}</h1>
         </div>
 
         <div className="bg-surface border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-4 text-center">Sign In</h2>
+          <h2 className="text-lg font-semibold mb-4 text-center">{t('Sign In')}</h2>
 
           {error && (
             <div className="bg-danger/10 border border-danger/30 text-danger rounded-lg px-4 py-2 mb-4 text-sm">
@@ -49,7 +50,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Email')}</label>
               <input
                 type="email"
                 value={email}
@@ -60,7 +61,7 @@ export default function Login() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Password')}</label>
               <input
                 type="password"
                 value={password}
@@ -75,7 +76,7 @@ export default function Login() {
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors disabled:opacity-50"
             >
               <LogIn className="w-4 h-4" />
-              {submitting ? 'Signing in...' : 'Sign In'}
+              {submitting ? t('Signing in...') : t('Sign In')}
             </button>
           </form>
         </div>

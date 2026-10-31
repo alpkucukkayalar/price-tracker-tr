@@ -5,10 +5,11 @@ import { getNotificationHistory, markNotificationsRead, type NotificationHistory
 import { NOTIFICATIONS_READ_EVENT } from '../useNotificationCount'
 import useTitle from '../useTitle'
 import { formatMoney } from '../lib/money'
+import { t, uiLocale, tl } from '../lib/i18n'
 
 function formatDateTime(s: string): string {
   const d = new Date(s.includes('Z') ? s : s + 'Z')
-  return d.toLocaleString()
+  return d.toLocaleString(uiLocale())
 }
 
 function ChannelBadge({ channel }: { channel: string | null }) {
@@ -16,7 +17,7 @@ function ChannelBadge({ channel }: { channel: string | null }) {
     return (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-primary bg-primary/10 rounded-full px-2.5 py-1">
         <MessageSquare className="w-3 h-3" />
-        Discord
+        {t('Discord')}
       </span>
     )
   }
@@ -32,38 +33,38 @@ function ChannelBadge({ channel }: { channel: string | null }) {
     return (
       <span className="inline-flex items-center gap-1 text-xs font-medium text-warning bg-warning/10 rounded-full px-2.5 py-1">
         <Webhook className="w-3 h-3" />
-        Webhook
+        {t('Webhook')}
       </span>
     )
   }
   return (
     <span className="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-hover rounded-full px-2.5 py-1">
       <HelpCircle className="w-3 h-3" />
-      Unknown
+      {t('Unknown')}
     </span>
   )
 }
 
 export default function NotificationsPage() {
-  useTitle('Notifications')
+  useTitle(t('Notifications'))
   const [rows, setRows] = useState<NotificationHistoryRow[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     getNotificationHistory(undefined, 200)
       .then(setRows)
-      .catch(err => console.error('Failed to load notifications', err))
+      .catch(err => console.error(t('Failed to load notifications'), err))
       .finally(() => setLoading(false))
     // Reading the page IS reading the notifications: bulk mark-read, then
     // tell any mounted badge (bell, drawer) to refetch its count now instead
     // of waiting for the next route change.
     markNotificationsRead()
       .then(() => window.dispatchEvent(new Event(NOTIFICATIONS_READ_EVENT)))
-      .catch(err => console.error('Failed to mark notifications read', err))
+      .catch(err => console.error(t('Failed to mark notifications read'), err))
   }, [])
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-text-muted">Loading...</div>
+    return <div className="flex items-center justify-center h-64 text-text-muted">{t('Loading...')}</div>
   }
 
   return (
@@ -71,11 +72,11 @@ export default function NotificationsPage() {
       <div className="flex items-center gap-3 mb-6">
         <Inbox className="w-6 h-6 text-primary flex-shrink-0" />
         <div>
-          <h1 className="text-2xl font-bold">Notifications</h1>
+          <h1 className="text-2xl font-bold">{t('Notifications')}</h1>
           <p className="text-text-muted text-sm mt-0.5">
             {rows.length === 0
-              ? 'No notifications sent yet.'
-              : `Last ${rows.length} price drop alert${rows.length !== 1 ? 's' : ''} across all trackers.`}
+              ? t('No notifications sent yet.')
+              : tl(`Last ${rows.length} price drop alert${rows.length !== 1 ? 's' : ''} across all trackers.`, `Tüm ürünlerdeki son ${rows.length} fiyat düşüşü bildirimi.`)}
           </p>
         </div>
       </div>
@@ -83,8 +84,8 @@ export default function NotificationsPage() {
       {rows.length === 0 ? (
         <div className="bg-surface border border-border rounded-xl p-8 text-center text-text-muted">
           <Bell className="w-12 h-12 mx-auto mb-3 opacity-40" />
-          <p>When a tracker drops below its target price and a notification channel is configured,</p>
-          <p>you'll see the history of sent alerts here.</p>
+          <p>{t('When a tracker drops below its target price and a notification channel is configured,')}</p>
+          <p>{t('you\'ll see the history of sent alerts here.')}</p>
         </div>
       ) : (
         <div className="bg-surface border border-border rounded-xl overflow-hidden">
@@ -92,13 +93,13 @@ export default function NotificationsPage() {
             <table className="w-full text-sm">
               <thead className="bg-bg/50 border-b border-border">
                 <tr className="text-text-muted text-xs">
-                  <th className="text-left px-4 py-3 font-medium">Sent</th>
-                  <th className="text-left px-4 py-3 font-medium">Tracker</th>
-                  <th className="text-left px-4 py-3 font-medium">Seller</th>
-                  <th className="text-left px-4 py-3 font-medium">Channel</th>
-                  <th className="text-right px-4 py-3 font-medium">Price</th>
-                  <th className="text-right px-4 py-3 font-medium">Target</th>
-                  <th className="text-right px-4 py-3 font-medium">Savings</th>
+                  <th className="text-left px-4 py-3 font-medium">{t('Sent')}</th>
+                  <th className="text-left px-4 py-3 font-medium">{t('Tracker')}</th>
+                  <th className="text-left px-4 py-3 font-medium">{t('Seller')}</th>
+                  <th className="text-left px-4 py-3 font-medium">{t('Channel')}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t('Price')}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t('Target')}</th>
+                  <th className="text-right px-4 py-3 font-medium">{t('Savings')}</th>
                 </tr>
               </thead>
               <tbody>

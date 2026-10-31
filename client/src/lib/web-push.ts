@@ -1,6 +1,7 @@
 // client/src/lib/web-push.ts
 import { subscribeWebPush, listWebPushDevices, deleteWebPushDevice } from '../api';
 import type { WebPushDevice } from '../types';
+import { t } from './i18n'
 
 export type SubscriptionState =
   | 'unsupported'
@@ -61,7 +62,7 @@ export async function subscribePush(): Promise<WebPushDevice> {
   }
   const permission = await Notification.requestPermission();
   if (permission !== 'granted') {
-    throw new Error('Notification permission denied');
+    throw new Error(t('Notification permission denied'));
   }
   const reg = await navigator.serviceWorker.ready;
   const sub = await reg.pushManager.subscribe({

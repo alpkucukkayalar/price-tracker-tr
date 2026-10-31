@@ -2,6 +2,7 @@ import { CheckCircle } from 'lucide-react';
 import type { Purchase } from '../types';
 import { savedAmount } from '../types';
 import { formatMoney } from '../lib/money'
+import { t, uiLocale } from '../lib/i18n'
 
 interface Props {
   purchase: Purchase;
@@ -17,7 +18,7 @@ interface Props {
  */
 export default function PurchasedBanner({ purchase, totalPurchases, onViewAll }: Props) {
   const saved = savedAmount(purchase);
-  const date = new Date(purchase.purchased_at).toLocaleDateString('en-US', {
+  const date = new Date(purchase.purchased_at).toLocaleDateString(uiLocale(), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -27,7 +28,7 @@ export default function PurchasedBanner({ purchase, totalPurchases, onViewAll }:
       <div className="text-sm flex items-center gap-2">
         <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
         <span>
-          Purchased on {date} — saved{' '}
+          {t('Purchased on')} {date} {t('— saved')}{' '}
           <span className="font-semibold text-success">{formatMoney(saved)}</span>{' '}
           <span className="text-text-muted">({purchase.quantity} × {formatMoney(purchase.purchase_price)})</span>
         </span>
@@ -37,7 +38,7 @@ export default function PurchasedBanner({ purchase, totalPurchases, onViewAll }:
           onClick={onViewAll}
           className="text-xs text-success hover:underline flex-shrink-0"
         >
-          View all {totalPurchases} purchases →
+          {t('View all')} {totalPurchases} {t('purchases →')}
         </button>
       )}
     </div>

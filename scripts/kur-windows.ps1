@@ -76,7 +76,7 @@ Copy-Item (Join-Path $src.FullName '*') $AppDir -Recurse -Force
 Step 'Bağımlılıklar ve derleme (5-10 dakika sürebilir)'
 Push-Location (Join-Path $AppDir 'server')
 npm ci --no-audit --no-fund; if ($LASTEXITCODE) { throw 'npm ci (server) başarısız' }
-npx --yes playwright install chromium; if ($LASTEXITCODE) { throw 'Chromium indirilemedi' }
+npx playwright install chromium chromium-headless-shell; if ($LASTEXITCODE) { throw 'Chromium indirilemedi' }
 npm run build; if ($LASTEXITCODE) { throw 'Server derlenemedi' }
 Pop-Location
 Push-Location (Join-Path $AppDir 'client')

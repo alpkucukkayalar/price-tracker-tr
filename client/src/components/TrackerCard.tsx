@@ -8,6 +8,7 @@ import { checkTracker } from '../api'
 import { useState } from 'react'
 import { formatMoney } from '../lib/money'
 import { detectRetailer, RETAILER_META } from '../lib/campaign'
+import { t, uiLocale, ago } from '../lib/i18n'
 
 /**
  * Mirrors the server-side isDoorbusterActive() helper in queries.ts. The
@@ -27,13 +28,13 @@ function isDoorbusterActiveClient(tracker: Tracker): boolean {
 }
 
 function timeAgo(dateStr: string | null): string {
-  if (!dateStr) return 'Never'
+  if (!dateStr) return t('Never')
   const date = new Date(dateStr.includes('Z') ? dateStr : dateStr + 'Z')
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
-  if (seconds < 60) return 'Just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-  return `${Math.floor(seconds / 86400)}d ago`
+  if (seconds < 60) return t('Just now')
+  if (seconds < 3600) return ago(Math.floor(seconds / 60), 'm')
+  if (seconds < 86400) return ago(Math.floor(seconds / 3600), 'h')
+  return ago(Math.floor(seconds / 86400), 'd')
 }
 
 function getHostname(url: string): string {
@@ -110,17 +111,17 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
             {isDoorbusterActiveClient(tracker) && (
               <span
                 className="inline-flex items-center gap-0.5 text-[10px] font-medium bg-warning/15 text-warning rounded px-1.5 py-0.5 flex-shrink-0"
-                title={`Doorbuster mode active until ${new Date(tracker.doorbuster_end_at!).toLocaleString()} — checking every ${tracker.doorbuster_interval_minutes} min`}
+                title={`Doorbuster mode active until ${new Date(tracker.doorbuster_end_at!).toLocaleString(uiLocale())} — checking every ${tracker.doorbuster_interval_minutes} min`}
               >
                 <Zap className="w-3 h-3" />
-                Doorbuster
+                {t('Doorbuster')}
               </span>
             )}
           </div>
           {overlapCount !== undefined && overlapCount > 0 && (
             <div className="inline-flex items-center gap-1 text-xs text-text-muted bg-surface-hover rounded-full px-2 py-0.5 mt-1">
               <Users className="w-3 h-3" />
-              Also tracked by {overlapCount}
+              {t('Also tracked by')} {overlapCount}
             </div>
           )}
           <a
@@ -156,18 +157,18 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
           </div>
           {sellerCount > 1 && bestSellerHost && (
             <div className="text-[11px] text-text-muted mt-0.5 truncate" title={`Lowest price across ${sellerCount} sellers`}>
-              lowest @ <span className="text-text">{bestSellerHost}</span>
+              {t('lowest @')} <span className="text-text">{bestSellerHost}</span>
             </div>
           )}
           <div className="text-xs text-text-muted mt-0.5 flex items-center gap-2 flex-wrap">
             {tracker.threshold_price && (
               <span>
-                Target: <span className="text-warning">{formatMoney(tracker.threshold_price)}</span>
+                {t('Target:')} <span className="text-warning">{formatMoney(tracker.threshold_price)}</span>
               </span>
             )}
             {minPrice != null && (
-              <span title="All-time low recorded for this tracker">
-                Low: <span className={atHistoricalLow ? 'text-success font-semibold' : 'text-text'}>
+              <span title={t('All-time low recorded for this tracker')}>
+                {t('Low:')} <span className={atHistoricalLow ? 'text-success font-semibold' : 'text-text'}>
                   {formatMoney(minPrice)}
                 </span>
               </span>
@@ -178,13 +179,13 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
                 title={`${sellerCount} seller URLs tracked`}
               >
                 <Store className="w-3 h-3" />
-                {sellerCount} sellers
+                {sellerCount} {t('sellers')}
               </span>
             )}
             {tracker.recent_low_tier ? (
               <span
                 className="inline-flex items-center gap-1 text-[10px] font-medium text-success bg-success/10 rounded-full px-2 py-0.5"
-                title="A record-low alert fired for this tracker in the last 48 hours"
+                title={t('A record-low alert fired for this tracker in the last 48 hours')}
               >
                 <TrendingDown className="w-3 h-3" />
                 {tracker.recent_low_tier === 'low_all_time'
@@ -196,28 +197,28 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
             ) : atHistoricalLow && (
               <span
                 className="inline-flex items-center gap-1 text-[10px] font-medium text-success bg-success/10 rounded-full px-2 py-0.5"
-                title="Current price matches the all-time low"
+                title={t('Current price matches the all-time low')}
               >
                 <TrendingDown className="w-3 h-3" />
-                at low
+                {t('at low')}
               </span>
             )}
             {(tracker.oos_seller_count ?? 0) > 0 &&
               tracker.oos_seller_count === tracker.seller_count && (
               <span
                 className="inline-flex items-center gap-1 text-[10px] font-medium text-warning bg-warning/10 rounded-full px-2 py-0.5"
-                title="Every seller reports this product out of stock — a back-in-stock alert will fire when it returns"
+                title={t('Every seller reports this product out of stock — a back-in-stock alert will fire when it returns')}
               >
-                out of stock
+                {t('out of stock')}
               </span>
             )}
             {belowThreshold && !notificationsConfigured && (
               <span
                 className="inline-flex items-center gap-1 text-[10px] font-medium text-warning bg-warning/10 rounded-full px-2 py-0.5"
-                title="This tracker is below its target price but no notification channel is configured. Set one up in Settings."
+                title={t('This tracker is below its target price but no notification channel is configured. Set one up in Settings.')}
               >
                 <BellOff className="w-3 h-3" />
-                notify off
+                {t('notify off')}
               </span>
             )}
           </div>
@@ -233,7 +234,7 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
               onClick={handleCheck}
               disabled={checking}
               className="p-1.5 rounded-lg hover:bg-surface-hover text-text-muted hover:text-primary transition-colors disabled:opacity-50"
-              title="Check now"
+              title={t('Check now')}
             >
               <RefreshCw className={`w-4 h-4 ${checking ? 'animate-spin' : ''}`} />
             </button>

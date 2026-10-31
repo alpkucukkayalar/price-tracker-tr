@@ -4,6 +4,7 @@ import { getPublicSavings } from '../api';
 import type { SavingsSummary } from '../types';
 import useTitle from '../useTitle';
 import { displayCurrency, formatMoney, formatMoneyAxis } from '../lib/money'
+import { t, uiLocale } from '../lib/i18n'
 
 /**
  * Public-facing cumulative-savings page. Backed by
@@ -15,7 +16,7 @@ import { displayCurrency, formatMoney, formatMoneyAxis } from '../lib/money'
 export default function Savings() {
   const [data, setData] = useState<SavingsSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
-  useTitle('Savings');
+  useTitle(t('Savings'));
 
   useEffect(() => {
     getPublicSavings()
@@ -26,22 +27,22 @@ export default function Savings() {
   if (error) {
     return (
       <div className="max-w-3xl mx-auto p-8 text-center text-text-muted">
-        Couldn't load savings data.
+        {t('Couldn\'t load savings data.')}
       </div>
     );
   }
   if (!data) {
-    return <div className="max-w-3xl mx-auto p-8 text-center text-text-muted">Loading...</div>;
+    return <div className="max-w-3xl mx-auto p-8 text-center text-text-muted">{t('Loading...')}</div>;
   }
   if (data.purchase_count === 0 || data.since === null) {
     return (
       <div className="max-w-3xl mx-auto p-8 text-center text-text-muted">
-        No purchases yet — check back soon.
+        {t('No purchases yet — check back soon.')}
       </div>
     );
   }
 
-  const since = new Date(data.since).toLocaleDateString('en-US', {
+  const since = new Date(data.since).toLocaleDateString(uiLocale(), {
     month: 'long',
     year: 'numeric',
   });
@@ -62,7 +63,7 @@ export default function Savings() {
           : formatMoney(data.total_saved)}
       </div>
       <div className="text-text-muted mt-3">
-        saved across {data.purchase_count} purchases since {since}
+        {t('saved across')} {data.purchase_count} {t('purchases since')} {since}
       </div>
 
       <div className="mt-12 h-64">
@@ -83,7 +84,7 @@ export default function Savings() {
                 color: '#f1f5f9',
                 fontSize: '13px',
               }}
-              formatter={(v: unknown) => [`${formatMoney(Number(v))}`, 'Cumulative']}
+              formatter={(v: unknown) => [`${formatMoney(Number(v))}`, t('Cumulative')]}
             />
             <Area type="monotone" dataKey="cumulative" stroke="#22c55e" fill="#22c55e33" strokeWidth={2} />
           </AreaChart>

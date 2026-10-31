@@ -1,3 +1,4 @@
+import { uiLocale } from '../lib/i18n'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { usePublicConfig } from '../lib/use-public-config'
@@ -25,7 +26,7 @@ function SavingsLine() {
 
   if (!data || data.total_saved <= 0 || !data.since) return null
 
-  const sinceLabel = new Date(data.since).toLocaleDateString('en-US', {
+  const sinceLabel = new Date(data.since).toLocaleDateString(uiLocale(), {
     month: 'short',
     year: 'numeric',
   })

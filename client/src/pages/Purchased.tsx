@@ -6,6 +6,7 @@ import type { PurchaseWithTracker } from '../types';
 import { savedAmount } from '../types';
 import useTitle from '../useTitle';
 import { formatMoney } from '../lib/money'
+import { t, uiLocale } from '../lib/i18n'
 
 /**
  * Derive a human label from the raw URL the server returns in
@@ -26,7 +27,7 @@ export default function Purchased() {
   const [rows, setRows] = useState<PurchaseWithTracker[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  useTitle('Purchased');
+  useTitle(t('Purchased'));
 
   useEffect(() => {
     listPurchases({ limit: 200 })
@@ -36,7 +37,7 @@ export default function Purchased() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-text-muted">Loading...</div>;
+    return <div className="flex items-center justify-center h-64 text-text-muted">{t('Loading...')}</div>;
   }
 
   if (error) {
@@ -46,8 +47,8 @@ export default function Purchased() {
   if (rows.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-80 gap-3 text-text-muted">
-        <h1 className="text-2xl font-bold text-text">Purchased</h1>
-        <p>No purchases yet — log one from any tracker detail page.</p>
+        <h1 className="text-2xl font-bold text-text">{t('Purchased')}</h1>
+        <p>{t('No purchases yet — log one from any tracker detail page.')}</p>
       </div>
     );
   }
@@ -56,7 +57,7 @@ export default function Purchased() {
   const avg = rows.length === 0 ? 0 : totalSaved / rows.length;
 
   async function onDelete(id: number) {
-    if (!confirm('Delete this purchase? If it was the only one for its tracker, the tracker will be re-activated.')) return;
+    if (!confirm(t('Delete this purchase? If it was the only one for its tracker, the tracker will be re-activated.'))) return;
     try {
       await apiDeletePurchase(id);
       setRows(prev => prev.filter(r => r.id !== id));
@@ -67,12 +68,12 @@ export default function Purchased() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Purchased</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('Purchased')}</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Stat label="TOTAL SAVED" value={`${formatMoney(totalSaved)}`} valueClass="text-success" />
-        <Stat label="PURCHASES" value={String(rows.length)} />
-        <Stat label="AVG PER PURCHASE" value={`${formatMoney(avg)}`} />
+        <Stat label={t('TOTAL SAVED')} value={`${formatMoney(totalSaved)}`} valueClass="text-success" />
+        <Stat label={t('PURCHASES')} value={String(rows.length)} />
+        <Stat label={t('AVG PER PURCHASE')} value={`${formatMoney(avg)}`} />
       </div>
 
       <div className="bg-surface border border-border rounded-xl overflow-hidden">
@@ -80,13 +81,13 @@ export default function Purchased() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-text-muted text-xs border-b border-border bg-bg/50">
-                <th className="text-left py-2 px-3 font-medium">Product</th>
-                <th className="text-left py-2 px-3 font-medium">Seller</th>
-                <th className="text-right py-2 px-3 font-medium">Paid</th>
-                <th className="text-right py-2 px-3 font-medium">First seen</th>
-                <th className="text-right py-2 px-3 font-medium">Saved</th>
-                <th className="text-right py-2 px-3 font-medium">Qty</th>
-                <th className="text-left py-2 px-3 font-medium">Date</th>
+                <th className="text-left py-2 px-3 font-medium">{t('Product')}</th>
+                <th className="text-left py-2 px-3 font-medium">{t('Seller')}</th>
+                <th className="text-right py-2 px-3 font-medium">{t('Paid')}</th>
+                <th className="text-right py-2 px-3 font-medium">{t('First seen')}</th>
+                <th className="text-right py-2 px-3 font-medium">{t('Saved')}</th>
+                <th className="text-right py-2 px-3 font-medium">{t('Qty')}</th>
+                <th className="text-left py-2 px-3 font-medium">{t('Date')}</th>
                 <th className="py-2 px-3 w-10"></th>
               </tr>
             </thead>
@@ -104,13 +105,13 @@ export default function Purchased() {
                   <td className="py-2 px-3 text-right text-success font-medium">{formatMoney(savedAmount(r))}</td>
                   <td className="py-2 px-3 text-right">{r.quantity}</td>
                   <td className="py-2 px-3 text-text-muted whitespace-nowrap">
-                    {new Date(r.purchased_at).toLocaleDateString()}
+                    {new Date(r.purchased_at).toLocaleDateString(uiLocale())}
                   </td>
                   <td className="py-2 px-3 text-right">
                     <button
                       onClick={() => onDelete(r.id)}
                       className="p-1 rounded text-text-muted hover:text-danger hover:bg-danger/10 transition-colors"
-                      title="Delete this purchase"
+                      title={t('Delete this purchase')}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

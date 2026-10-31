@@ -8,6 +8,7 @@ import {
   type PublicWishlist,
 } from '../api';
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 /**
  * Imperatively set <title> + <meta> tags. Mirrors PublicProduct's setMeta —
@@ -76,7 +77,7 @@ export default function WishlistPublic() {
         } else {
           setState({
             kind: 'error',
-            message: err instanceof Error ? err.message : 'Unknown error',
+            message: err instanceof Error ? err.message : t('Unknown error'),
           });
         }
       });
@@ -126,7 +127,7 @@ export default function WishlistPublic() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === 'ALREADY_CLAIMED') {
-        setActionError('Someone else just claimed this. Refreshing…');
+        setActionError(t('Someone else just claimed this. Refreshing…'));
         const fresh = await getPublicWishlist(token).catch(() => null);
         if (fresh) setState({ kind: 'ready', data: fresh });
       } else {
@@ -161,10 +162,10 @@ export default function WishlistPublic() {
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-lg font-bold text-text no-underline">
             <BarChart3 className="w-6 h-6 text-primary" />
-            Price Tracker
+            {t('Price Tracker')}
           </Link>
           <Link to="/login" className="text-sm text-primary hover:underline">
-            Sign in
+            {t('Sign in')}
           </Link>
         </div>
       </header>
@@ -178,16 +179,16 @@ export default function WishlistPublic() {
         {state.kind === 'not-found' && (
           <div className="bg-surface border border-border rounded-xl p-8 text-center">
             <h1 className="text-xl font-semibold text-text mb-2">
-              This wishlist link isn't valid
+              {t('This wishlist link isn\'t valid')}
             </h1>
             <p className="text-text-muted text-sm">
-              It may have been rotated. Ask the owner for a fresh link.
+              {t('It may have been rotated. Ask the owner for a fresh link.')}
             </p>
           </div>
         )}
         {state.kind === 'error' && (
           <div className="bg-danger/10 border border-danger/30 text-danger rounded-xl p-4 text-sm">
-            Something went wrong loading this wishlist. ({state.message})
+            {t('Something went wrong loading this wishlist. (')}{state.message})
           </div>
         )}
         {state.kind === 'ready' && (
@@ -225,7 +226,7 @@ function WishlistView({
           <Gift className="w-6 h-6 text-primary" /> {title}
         </h1>
         <p className="text-sm text-text-muted">
-          Pick something to gift. Items already claimed by others are marked.
+          {t('Pick something to gift. Items already claimed by others are marked.')}
         </p>
       </div>
 
@@ -238,7 +239,7 @@ function WishlistView({
       {data.items.length === 0 ? (
         <div className="bg-surface border border-border rounded-xl p-8 text-center">
           <p className="text-text-muted text-sm">
-            No items yet — the owner hasn't added anything.
+            {t('No items yet — the owner hasn\'t added anything.')}
           </p>
         </div>
       ) : (
@@ -283,7 +284,7 @@ function WishlistView({
                       className="w-full flex items-center justify-center gap-1 px-3 py-2 bg-success/15 hover:bg-success/25 text-success rounded-lg text-sm font-medium transition-colors"
                     >
                       <Check className="w-4 h-4" />
-                      You claimed this — undo
+                      {t('You claimed this — undo')}
                     </button>
                   ) : item.is_claimed ? (
                     <button
@@ -291,7 +292,7 @@ function WishlistView({
                       className="w-full flex items-center justify-center gap-1 px-3 py-2 bg-surface-hover text-text-muted rounded-lg text-sm font-medium cursor-not-allowed"
                     >
                       <X className="w-4 h-4" />
-                      Already claimed by someone
+                      {t('Already claimed by someone')}
                     </button>
                   ) : (
                     <button
@@ -299,7 +300,7 @@ function WishlistView({
                       className="w-full flex items-center justify-center gap-1 px-3 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       <Gift className="w-4 h-4" />
-                      Claim this gift
+                      {t('Claim this gift')}
                     </button>
                   )}
                 </div>
@@ -310,9 +311,9 @@ function WishlistView({
       )}
 
       <p className="text-xs text-text-muted text-center pt-4 border-t border-border">
-        Powered by Price Tracker —{' '}
+        {t('Powered by Price Tracker —')}{' '}
         <Link to="/login" className="text-primary hover:underline">
-          track your own prices
+          {t('track your own prices')}
         </Link>
       </p>
     </div>

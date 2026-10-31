@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle, Newspaper, Save } from 'lucide-react'
 import { getSettings, updateSettings } from '../api'
+import { t } from '../lib/i18n'
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DAYS = [t('Sunday'), t('Monday'), t('Tuesday'), t('Wednesday'), t('Thursday'), t('Friday'), t('Saturday')]
 const CHANNELS = [
-  { value: '', label: 'First configured (ntfy → Discord → email → webhook)' },
+  { value: '', label: t('First configured (ntfy → Discord → email → webhook)') },
   { value: 'ntfy', label: 'ntfy' },
-  { value: 'discord', label: 'Discord' },
-  { value: 'email', label: 'Email' },
-  { value: 'webhook', label: 'Generic webhook' },
+  { value: 'discord', label: t('Discord') },
+  { value: 'email', label: t('Email') },
+  { value: 'webhook', label: t('Generic webhook') },
 ]
 
 /**
@@ -61,23 +62,21 @@ export function DigestCard() {
     <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mt-4">
       <div className="flex items-center gap-2 mb-2">
         <Newspaper className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold">Weekly Digest</h2>
+        <h2 className="text-lg font-semibold">{t('Weekly Digest')}</h2>
       </div>
       <p className="text-text-muted text-sm mb-4">
-        One summary per week: biggest drops, record lows, trackers that need attention,
-        targets worth revisiting, and deals you hit but never bought. Quiet weeks send
-        nothing.
+        {t('One summary per week: biggest drops, record lows, trackers that need attention, targets worth revisiting, and deals you hit but never bought. Quiet weeks send nothing.')}
       </p>
 
       <label className="flex items-center gap-2 cursor-pointer mb-4">
         <input type="checkbox" checked={enabled} onChange={e => setEnabled(e.target.checked)} className="rounded" />
-        <span className="text-sm">Send me a weekly digest</span>
+        <span className="text-sm">{t('Send me a weekly digest')}</span>
       </label>
 
       {enabled && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
           <div>
-            <label className="block text-xs text-text-muted mb-1">Channel</label>
+            <label className="block text-xs text-text-muted mb-1">{t('Channel')}</label>
             <select
               value={channel}
               onChange={e => setChannel(e.target.value)}
@@ -89,7 +88,7 @@ export function DigestCard() {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-text-muted mb-1">Day</label>
+            <label className="block text-xs text-text-muted mb-1">{t('Day')}</label>
             <select
               value={day}
               onChange={e => setDay(e.target.value)}
@@ -101,7 +100,7 @@ export function DigestCard() {
             </select>
           </div>
           <div>
-            <label className="block text-xs text-text-muted mb-1">Hour (Central)</label>
+            <label className="block text-xs text-text-muted mb-1">{t('Hour (Central)')}</label>
             <select
               value={hour}
               onChange={e => setHour(e.target.value)}
@@ -120,7 +119,7 @@ export function DigestCard() {
       {enabled && (
         <label className="flex items-center gap-2 cursor-pointer mb-4">
           <input type="checkbox" checked={always} onChange={e => setAlways(e.target.checked)} className="rounded" />
-          <span className="text-sm text-text-muted">Send even when there&apos;s nothing to report</span>
+          <span className="text-sm text-text-muted">{t('Send even when there\'s nothing to report')}</span>
         </label>
       )}
 
@@ -130,7 +129,7 @@ export function DigestCard() {
         className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
       >
         {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-        {saved ? 'Saved!' : saving ? 'Saving...' : 'Save'}
+        {saved ? 'Saved!' : saving ? 'Saving...' : t('Save')}
       </button>
     </div>
   )

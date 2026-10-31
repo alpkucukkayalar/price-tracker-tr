@@ -9,6 +9,7 @@ import { InvitesCard } from '../components/InvitesCard'
 import { WishlistCard } from '../components/WishlistCard'
 import { AffiliateStatusCard } from '../components/AffiliateStatusCard'
 import { DigestCard } from '../components/DigestCard'
+import { t } from '../lib/i18n'
 
 type ChannelKey = 'discord' | 'ntfy' | 'webhook' | 'email' | 'web_push'
 
@@ -32,11 +33,11 @@ const CHANNELS: ChannelConfig[] = [
     cooldownKey: 'discord_cooldown_hours',
     minConfidenceKey: 'discord_min_confidence',
     icon: <MessageSquare className="w-5 h-5 text-primary" />,
-    title: 'Discord',
+    title: t('Discord'),
     description: (
       <>
-        Paste a Discord channel webhook URL. Create one under{' '}
-        <span className="text-text">Server Settings → Integrations → Webhooks</span>.
+        {t('Paste a Discord channel webhook URL. Create one under')}{' '}
+        <span className="text-text">{t('Server Settings → Integrations → Webhooks')}</span>.
       </>
     ),
     placeholder: 'https://discord.com/api/webhooks/...',
@@ -51,11 +52,9 @@ const CHANNELS: ChannelConfig[] = [
     title: 'ntfy (push notifications)',
     description: (
       <>
-        Paste a ntfy topic URL — works with{' '}
+        {t('Paste a ntfy topic URL — works with')}{' '}
         <a href="https://ntfy.sh" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">ntfy.sh</a>{' '}
-        or any self-hosted instance. Install the ntfy app on your phone, subscribe to the same topic, and
-        you'll get price drops as push notifications. Use a long, unguessable topic name since anyone
-        who knows it can publish to it.
+        {t('or any self-hosted instance. Install the ntfy app on your phone, subscribe to the same topic, and you\'ll get price drops as push notifications. Use a long, unguessable topic name since anyone who knows it can publish to it.')}
       </>
     ),
     placeholder: 'https://ntfy.sh/my-price-alerts-abc123',
@@ -67,11 +66,10 @@ const CHANNELS: ChannelConfig[] = [
     cooldownKey: 'webhook_cooldown_hours',
     minConfidenceKey: 'webhook_min_confidence',
     icon: <Webhook className="w-5 h-5 text-primary" />,
-    title: 'Custom Webhook',
+    title: t('Custom Webhook'),
     description: (
       <>
-        Any HTTPS endpoint that accepts a POST with JSON. Great for Home Assistant, Slack incoming
-        webhooks, n8n, or your own bot. Payload:{' '}
+        {t('Any HTTPS endpoint that accepts a POST with JSON. Great for Home Assistant, Slack incoming webhooks, n8n, or your own bot. Payload:')}{' '}
         <code className="text-xs bg-bg px-1.5 py-0.5 rounded">{'{ event, tracker, current_price, savings, error, timestamp }'}</code>
       </>
     ),
@@ -84,10 +82,10 @@ const CHANNELS: ChannelConfig[] = [
     cooldownKey: 'email_cooldown_hours',
     minConfidenceKey: 'email_min_confidence',
     icon: <Mail className="w-5 h-5 text-primary" />,
-    title: 'Email',
+    title: t('Email'),
     description: (
       <>
-        Get price alerts by email. Messages are sent from{' '}
+        {t('Get price alerts by email. Messages are sent from')}{' '}
         <span className="text-text">alerts@schultzsolutions.tech</span>.
       </>
     ),
@@ -98,7 +96,7 @@ const CHANNELS: ChannelConfig[] = [
 ]
 
 export default function SettingsPage() {
-  useTitle('Settings')
+  useTitle(t('Settings'))
   const [values, setValues] = useState<Record<ChannelKey, string>>({ discord: '', ntfy: '', webhook: '', email: '', web_push: '' })
   // Per-channel cooldown overrides. Empty string = use server default
   // (config.notificationCooldownHours, currently 6h). "0" = no cooldown.
@@ -198,9 +196,9 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Settings</h1>
+      <h1 className="text-2xl font-bold mb-2">{t('Settings')}</h1>
       <p className="text-text-muted text-sm mb-6">
-        Configure one or more notification channels. You'll receive alerts on every channel you set up.
+        {t('Configure one or more notification channels. You\'ll receive alerts on every channel you set up.')}
       </p>
 
       <div className="flex flex-col gap-4">
@@ -222,7 +220,7 @@ export default function SettingsPage() {
 
               {hasConfigInput && (
                 <>
-                  <label className="block text-sm font-medium text-text-muted mb-1.5">{ch.inputType === 'email' ? 'Recipient' : 'URL'}</label>
+                  <label className="block text-sm font-medium text-text-muted mb-1.5">{ch.inputType === 'email' ? t('Recipient') : 'URL'}</label>
                   <input
                     type={ch.inputType ?? 'url'}
                     value={val}
@@ -236,7 +234,7 @@ export default function SettingsPage() {
               {ch.key === 'ntfy' && (
                 <>
                   <label className="block text-sm font-medium text-text-muted mb-1.5">
-                    Access token <span className="text-text-muted/60 font-normal">(optional — for self-hosted instances with auth)</span>
+                    {t('Access token')} <span className="text-text-muted/60 font-normal">{t('(optional — for self-hosted instances with auth)')}</span>
                   </label>
                   <input
                     type="password"
@@ -253,7 +251,7 @@ export default function SettingsPage() {
                 {ch.cooldownKey && (
                   <div>
                     <label className="block text-sm font-medium text-text-muted mb-1.5">
-                      Cooldown <span className="text-text-muted/60 font-normal">(hours)</span>
+                      {t('Cooldown')} <span className="text-text-muted/60 font-normal">{t('(hours)')}</span>
                     </label>
                     <input
                       type="number"
@@ -268,16 +266,16 @@ export default function SettingsPage() {
                 )}
                 <div>
                   <label className="block text-sm font-medium text-text-muted mb-1.5">
-                    Minimum confidence
+                    {t('Minimum confidence')}
                   </label>
                   <select
                     value={minConfidences[ch.key] || 'LOW'}
                     onChange={e => setMinConfidences(m => ({ ...m, [ch.key]: e.target.value === 'LOW' ? '' : e.target.value }))}
                     className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-primary"
                   >
-                    <option value="LOW">All deals</option>
-                    <option value="MEDIUM">Good deals only</option>
-                    <option value="HIGH">Strong deals only</option>
+                    <option value="LOW">{t('All deals')}</option>
+                    <option value="MEDIUM">{t('Good deals only')}</option>
+                    <option value="HIGH">{t('Strong deals only')}</option>
                   </select>
                 </div>
               </div>
@@ -289,7 +287,7 @@ export default function SettingsPage() {
                   className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                 >
                   {saved ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-                  {saved ? 'Saved!' : saving ? 'Saving...' : 'Save'}
+                  {saved ? 'Saved!' : saving ? 'Saving...' : t('Save')}
                 </button>
                 {ch.test && (
                   <button
@@ -298,12 +296,12 @@ export default function SettingsPage() {
                     className="flex items-center gap-2 px-4 py-2.5 bg-surface-hover text-text-muted hover:text-text rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
-                    {testing ? 'Sending...' : 'Test'}
+                    {testing ? 'Sending...' : t('Test')}
                   </button>
                 )}
                 {testForThis?.ok && (
                   <span className="flex items-center gap-1 text-sm text-success">
-                    <CheckCircle className="w-4 h-4" /> Sent!
+                    <CheckCircle className="w-4 h-4" /> {t('Sent!')}
                   </span>
                 )}
               </div>
@@ -311,7 +309,7 @@ export default function SettingsPage() {
                 <div className="mt-3 flex items-start gap-2 text-sm text-danger bg-danger/10 rounded-lg px-3 py-2">
                   <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <div className="min-w-0 break-words">
-                    <div className="font-medium">Test failed</div>
+                    <div className="font-medium">{t('Test failed')}</div>
                     {testForThis.error && (
                       <div className="text-xs text-danger/80 mt-0.5 font-mono break-all">{testForThis.error}</div>
                     )}
@@ -340,12 +338,10 @@ export default function SettingsPage() {
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mt-4">
         <div className="flex items-center gap-2 mb-2">
           <Users className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">Community</h2>
+          <h2 className="text-lg font-semibold">{t('Community')}</h2>
         </div>
         <p className="text-text-muted text-sm mb-4">
-          When other users track the same products you do, the dashboard shows a small
-          "Also tracked by N" indicator. Turn this on to let those users see your
-          display name too; off keeps you anonymous.
+          {t('When other users track the same products you do, the dashboard shows a small "Also tracked by N" indicator. Turn this on to let those users see your display name too; off keeps you anonymous.')}
         </p>
         <label className="flex items-center gap-2 cursor-pointer mb-4">
           <input
@@ -354,7 +350,7 @@ export default function SettingsPage() {
             onChange={e => setShareDisplayName(e.target.checked)}
             className="rounded"
           />
-          <span className="text-sm">Show my display name to other users on trackers we share</span>
+          <span className="text-sm">{t('Show my display name to other users on trackers we share')}</span>
         </label>
         <div className="border-t border-border pt-4 mb-4">
           <label className="flex items-start gap-2 cursor-pointer mb-1">
@@ -364,10 +360,10 @@ export default function SettingsPage() {
               onChange={e => setShareInDealFeed(e.target.checked)}
               className="rounded mt-0.5"
             />
-            <span className="text-sm">Share my biggest drops with the community deal feed</span>
+            <span className="text-sm">{t('Share my biggest drops with the community deal feed')}</span>
           </label>
           <p className="text-xs text-text-muted ml-6">
-            Anonymous. Other users see the price + product, never your name. Default off. View the public deal feed at <Link to="/deals" className="text-primary hover:underline">/deals</Link>.
+            {t('Anonymous. Other users see the price + product, never your name. Default off. View the public deal feed at')} <Link to="/deals" className="text-primary hover:underline">/deals</Link>.
           </p>
         </div>
         <button
@@ -376,7 +372,7 @@ export default function SettingsPage() {
           className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
         >
           {savedCommunity ? <CheckCircle className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {savedCommunity ? 'Saved!' : savingCommunity ? 'Saving...' : 'Save'}
+          {savedCommunity ? 'Saved!' : savingCommunity ? 'Saving...' : t('Save')}
         </button>
       </div>
 

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BarChart3, UserPlus } from 'lucide-react';
 import { register } from '../api';
 import { useAuth } from '../context/AuthContext';
+import { t } from '../lib/i18n'
 
 export default function Register() {
   const [searchParams] = useSearchParams();
@@ -54,7 +55,7 @@ export default function Register() {
       setUser(user);
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
+      setError(err instanceof Error ? err.message : t('Registration failed'));
     } finally {
       setSubmitting(false);
     }
@@ -65,9 +66,9 @@ export default function Register() {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center px-4">
         <div className="bg-surface border border-border rounded-xl p-6 max-w-sm w-full text-center">
-          <h2 className="text-lg font-semibold mb-2">Invite Required</h2>
+          <h2 className="text-lg font-semibold mb-2">{t('Invite Required')}</h2>
           <p className="text-text-muted text-sm">
-            You need an invite link to create an account. Ask an admin for one.
+            {t('You need an invite link to create an account. Ask an admin for one.')}
           </p>
         </div>
       </div>
@@ -82,7 +83,7 @@ export default function Register() {
           <div className="mb-4">
             <div className="inline-block w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <p className="text-text-muted text-sm">Checking invite...</p>
+          <p className="text-text-muted text-sm">{t('Checking invite...')}</p>
         </div>
       </div>
     );
@@ -91,16 +92,16 @@ export default function Register() {
   // Invalid invite code
   if (inviteState === 'invalid') {
     const reasonMessages: Record<string, string> = {
-      'not_found': 'This invite link doesn\'t exist.',
-      'already_used': 'This invite has already been redeemed.',
-      'expired': 'This invite has expired.',
+      'not_found': t('This invite link doesn\'t exist.'),
+      'already_used': t('This invite has already been redeemed.'),
+      'expired': t('This invite has expired.'),
     };
-    const message = reasonMessages[invalidReason || 'not_found'] || 'Invalid invite link.';
+    const message = reasonMessages[invalidReason || 'not_found'] || t('Invalid invite link.');
 
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center px-4">
         <div className="bg-surface border border-border rounded-xl p-6 max-w-sm w-full text-center">
-          <h2 className="text-lg font-semibold mb-2 text-danger">Invite Invalid</h2>
+          <h2 className="text-lg font-semibold mb-2 text-danger">{t('Invite Invalid')}</h2>
           <p className="text-text-muted text-sm">
             {message}
           </p>
@@ -115,15 +116,15 @@ export default function Register() {
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center gap-2 mb-8">
           <BarChart3 className="w-8 h-8 text-primary" />
-          <h1 className="text-2xl font-bold text-text">Price Tracker</h1>
+          <h1 className="text-2xl font-bold text-text">{t('Price Tracker')}</h1>
         </div>
 
         <div className="bg-surface border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold mb-1 text-center">Create Account</h2>
+          <h2 className="text-lg font-semibold mb-1 text-center">{t('Create Account')}</h2>
           {inviterName ? (
-            <p className="text-text-muted text-sm text-center mb-4">Invited by {inviterName}</p>
+            <p className="text-text-muted text-sm text-center mb-4">{t('Invited by')} {inviterName}</p>
           ) : (
-            <p className="text-text-muted text-sm text-center mb-4">Invited</p>
+            <p className="text-text-muted text-sm text-center mb-4">{t('Invited')}</p>
           )}
 
           {error && (
@@ -134,28 +135,28 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Display Name</label>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Display Name')}</label>
               <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
                 required autoFocus
                 className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text placeholder-text-muted/50 focus:outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Email')}</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 required
                 className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text placeholder-text-muted/50 focus:outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-text-muted mb-1.5">Password</label>
+              <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Password')}</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                 required minLength={8}
                 className="w-full bg-bg border border-border rounded-lg px-4 py-2.5 text-text placeholder-text-muted/50 focus:outline-none focus:border-primary" />
-              <p className="text-xs text-text-muted mt-1">Minimum 8 characters</p>
+              <p className="text-xs text-text-muted mt-1">{t('Minimum 8 characters')}</p>
             </div>
             <button type="submit" disabled={submitting}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors disabled:opacity-50">
               <UserPlus className="w-4 h-4" />
-              {submitting ? 'Creating account...' : 'Create Account'}
+              {submitting ? t('Creating account...') : t('Create Account')}
             </button>
           </form>
         </div>

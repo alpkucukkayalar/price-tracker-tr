@@ -8,7 +8,7 @@
  */
 import { formatMoney } from '../lib/money.js';
 
-export const DIGEST_TZ = 'America/Chicago';
+export const DIGEST_TZ = process.env.DIGEST_TZ || 'Europe/Istanbul';
 
 export interface DigestSettings {
   enabled?: string; // 'true' (default) | 'false'

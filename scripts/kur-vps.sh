@@ -85,7 +85,7 @@ log "Bağımlılıklar ve derleme (birkaç dakika sürebilir)"
 cd "$APP_DIR/server"
 sudo -u "$APP_USER" -H npm ci --no-audit --no-fund
 npx --yes playwright install-deps chromium
-sudo -u "$APP_USER" -H npx playwright install chromium
+sudo -u "$APP_USER" -H npx playwright install chromium chromium-headless-shell
 sudo -u "$APP_USER" -H npm run build
 cd "$APP_DIR/client"
 sudo -u "$APP_USER" -H npm ci --no-audit --no-fund

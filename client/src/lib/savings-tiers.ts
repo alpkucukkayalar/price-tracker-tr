@@ -1,3 +1,4 @@
+import { t } from './i18n'
 /**
  * Savings celebration tiers. Pure function, easily testable. The tier
  * thresholds and sayings are the single source of truth — the celebration
@@ -23,11 +24,11 @@ const TIERS: readonly TierDef[] = [
     min: 1,
     max: 10,
     sayings: [
-      'Every dollar counts.',
+      t('Every dollar counts.'),
       'A coffee on the house.',
-      'Small wins compound.',
-      'Your vigilance paid off.',
-      "That's a snack, at least.",
+      t('Small wins compound.'),
+      t('Your vigilance paid off.'),
+      t('That\'s a snack, at least.'),
     ],
   },
   {
@@ -35,11 +36,11 @@ const TIERS: readonly TierDef[] = [
     min: 10,
     max: 25,
     sayings: [
-      'Lunch is on the bots.',
-      'Patience, rewarded.',
-      "Someone dropped the price so you didn't have to.",
-      "That's the good kind of green.",
-      'Enough for a decent takeout order.',
+      t('Lunch is on the bots.'),
+      t('Patience, rewarded.'),
+      t('Someone dropped the price so you didn\'t have to.'),
+      t('That\'s the good kind of green.'),
+      t('Enough for a decent takeout order.'),
     ],
   },
   {
@@ -47,11 +48,11 @@ const TIERS: readonly TierDef[] = [
     min: 25,
     max: 50,
     sayings: [
-      'Tank of gas saved.',
-      "Now we're talking.",
-      'The algorithms are smiling on you.',
-      "That's a real dinner out.",
-      'Worth every cron tick.',
+      t('Tank of gas saved.'),
+      t('Now we\'re talking.'),
+      t('The algorithms are smiling on you.'),
+      t('That\'s a real dinner out.'),
+      t('Worth every cron tick.'),
     ],
   },
   {
@@ -59,11 +60,11 @@ const TIERS: readonly TierDef[] = [
     min: 50,
     max: 100,
     sayings: [
-      'Weekend fund activated.',
-      'Your future self is thanking you.',
-      'The scraper earned its keep this month.',
-      'New keyboard fund right there.',
-      'Victory. Actual victory.',
+      t('Weekend fund activated.'),
+      t('Your future self is thanking you.'),
+      t('The scraper earned its keep this month.'),
+      t('New keyboard fund right there.'),
+      t('Victory. Actual victory.'),
     ],
   },
   {
@@ -71,11 +72,11 @@ const TIERS: readonly TierDef[] = [
     min: 100,
     max: 250,
     sayings: [
-      'Your patience just paid rent on a CT.',
-      'This is why you automate.',
-      'The price tracker is officially in the black.',
-      "Somewhere, a retailer's pricing algorithm is crying.",
-      'Put it toward more homelab gear. You know you want to.',
+      t('Your patience just paid rent on a CT.'),
+      t('This is why you automate.'),
+      t('The price tracker is officially in the black.'),
+      t('Somewhere, a retailer\'s pricing algorithm is crying.'),
+      t('Put it toward more homelab gear. You know you want to.'),
     ],
   },
   {
@@ -83,11 +84,11 @@ const TIERS: readonly TierDef[] = [
     min: 250,
     max: Infinity,
     sayings: [
-      'Absolutely unhinged savings.',
-      'The homelab has achieved sentience.',
-      'This tracker pays for itself and then some.',
-      'Start a second homelab with the savings.',
-      'You just out-bargained the entire internet.',
+      t('Absolutely unhinged savings.'),
+      t('The homelab has achieved sentience.'),
+      t('This tracker pays for itself and then some.'),
+      t('Start a second homelab with the savings.'),
+      t('You just out-bargained the entire internet.'),
     ],
   },
 ] as const

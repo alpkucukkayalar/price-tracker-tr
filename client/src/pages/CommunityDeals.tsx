@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { BarChart3, ArrowRight } from 'lucide-react';
 import { getCommunityDeals, type DealFeedEntry } from '../api';
 import { formatMoney } from '../lib/money'
+import { t, ago } from '../lib/i18n'
 
 /**
  * Imperatively set <title> + <meta> tags. Same pattern as PublicProduct —
@@ -22,9 +23,9 @@ function setMeta(name: string, content: string): void {
 }
 
 function fmtHoursAgo(hours: number): string {
-  if (hours < 1) return 'Just now';
-  if (hours < 24) return `${Math.round(hours)}h ago`;
-  return `${Math.floor(hours / 24)}d ago`;
+  if (hours < 1) return t('Just now');
+  if (hours < 24) return ago(Math.round(hours), 'h');
+  return ago(Math.floor(hours / 24), 'd');
 }
 
 function fmtPrice(value: number): string {
@@ -46,7 +47,7 @@ export default function CommunityDealsPage() {
       .then(res => { if (!cancelled) setState({ kind: 'ready', entries: res.entries }); })
       .catch(err => {
         if (cancelled) return;
-        setState({ kind: 'error', message: err instanceof Error ? err.message : 'Unknown error' });
+        setState({ kind: 'error', message: err instanceof Error ? err.message : t('Unknown error') });
       });
     return () => { cancelled = true; };
   }, []);
@@ -74,19 +75,19 @@ export default function CommunityDealsPage() {
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-lg font-bold text-text no-underline">
             <BarChart3 className="w-6 h-6 text-primary" />
-            Price Tracker
+            {t('Price Tracker')}
           </Link>
           <Link to="/login" className="text-sm text-primary hover:underline">
-            Sign in
+            {t('Sign in')}
           </Link>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-text mb-1">Community Deals</h1>
+          <h1 className="text-2xl font-bold text-text mb-1">{t('Community Deals')}</h1>
           <p className="text-text-muted text-sm">
-            Biggest drops across the Price Tracker community in the last 7 days.
+            {t('Biggest drops across the Price Tracker community in the last 7 days.')}
           </p>
         </div>
 
@@ -95,14 +96,14 @@ export default function CommunityDealsPage() {
         )}
         {state.kind === 'error' && (
           <div className="bg-danger/10 border border-danger/30 text-danger rounded-xl p-4 text-sm">
-            Something went wrong loading the deal feed. ({state.message})
+            {t('Something went wrong loading the deal feed. (')}{state.message})
           </div>
         )}
         {state.kind === 'ready' && state.entries.length === 0 && (
           <div className="bg-surface border border-border rounded-xl p-8 text-center">
-            <h2 className="text-lg font-semibold text-text mb-2">No deals yet — check back soon</h2>
+            <h2 className="text-lg font-semibold text-text mb-2">{t('No deals yet — check back soon')}</h2>
             <p className="text-text-muted text-sm">
-              When tracked products hit their thresholds, they'll show up here.
+              {t('When tracked products hit their thresholds, they\'ll show up here.')}
             </p>
           </div>
         )}
@@ -133,7 +134,7 @@ function DealCard({ entry }: { entry: DealFeedEntry }) {
         {fmtHoursAgo(entry.hours_ago)}
       </p>
       <p className="text-xs text-primary flex items-center gap-1">
-        View price history
+        {t('View price history')}
         <ArrowRight className="w-3 h-3" />
       </p>
     </Link>
