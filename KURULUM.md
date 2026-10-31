@@ -9,6 +9,25 @@ adresiyle açarsın. Bilgisayar uykuya geçerse o sürede kontrol yapılmaz, uya
 
 ---
 
+## ⚡ Windows: tek komutla kurulum (önerilen)
+
+1. **Başlat** menüsüne `PowerShell` yaz ve aç (yönetici olarak açmana gerek yok).
+2. Şu satırı kopyala, PowerShell penceresine **sağ tıkla** (yapıştırır) ve **Enter**'a bas:
+
+   ```powershell
+   irm https://raw.githubusercontent.com/alpkucukkayalar/price-tracker-tr/main/scripts/kur-windows.ps1 | iex
+   ```
+
+3. Node.js kurulurken Windows "Bu uygulamanın değişiklik yapmasına izin veriyor musunuz?" diye sorarsa **Evet** de.
+4. 5–10 dakika sonra tarayıcı kendiliğinden açılır → yönetici hesabını oluştur. Bitti.
+
+Script; Node.js 22'yi kurar, uygulamayı `C:\Users\<sen>\fiyat-takip` altına indirir, bilgisayar açılınca arka
+planda otomatik başlatır ve prize takılıyken uyku modunu kapatır. Güncellemek için aynı komutu tekrar çalıştır
+(verilerin korunur). Laptop ise **prizde ve kapağı açık** bırak (ya da Denetim Masası → Güç Seçenekleri →
+"Kapağı kapatınca: Hiçbir şey yapma").
+
+Aşağısı elle kurulum isteyenler içindir.
+
 ## 1. Gerekenler (bir kere)
 
 | | Windows | Mac |
