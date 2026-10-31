@@ -1,3 +1,11 @@
+# Price Tracker — Türkiye sürümü
+
+> **Bu fork**, orijinal projeye Trendyol, Hepsiburada, Amazon.com.tr ve N11 desteği, TL fiyat formatı ve
+> **Efsane Cuma / Black Friday sahte indirim analizi** ekler. Türkçe kurulum ve kullanım için
+> **[KURULUM.md](./KURULUM.md)** (kendi bilgisayarın) veya **[SUNUCU-KURULUMU.md](./SUNUCU-KURULUMU.md)** (kiralık sunucu, tek komut) dosyasına bak. Orijinal README aşağıda.
+
+---
+
 # Price Tracker
 
 > A self-hosted price tracker for anything you can link to. Multi-seller support, multiple notification channels, and a dashboard that actually respects your attention.

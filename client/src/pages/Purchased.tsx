@@ -5,6 +5,7 @@ import { listPurchases, deletePurchase as apiDeletePurchase } from '../api';
 import type { PurchaseWithTracker } from '../types';
 import { savedAmount } from '../types';
 import useTitle from '../useTitle';
+import { formatMoney } from '../lib/money'
 
 /**
  * Derive a human label from the raw URL the server returns in
@@ -69,9 +70,9 @@ export default function Purchased() {
       <h1 className="text-2xl font-bold mb-6">Purchased</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Stat label="TOTAL SAVED" value={`$${totalSaved.toFixed(2)}`} valueClass="text-success" />
+        <Stat label="TOTAL SAVED" value={`${formatMoney(totalSaved)}`} valueClass="text-success" />
         <Stat label="PURCHASES" value={String(rows.length)} />
-        <Stat label="AVG PER PURCHASE" value={`$${avg.toFixed(2)}`} />
+        <Stat label="AVG PER PURCHASE" value={`${formatMoney(avg)}`} />
       </div>
 
       <div className="bg-surface border border-border rounded-xl overflow-hidden">
@@ -98,9 +99,9 @@ export default function Purchased() {
                     </Link>
                   </td>
                   <td className="py-2 px-3 text-text-muted">{sellerDisplay(r.seller_label)}</td>
-                  <td className="py-2 px-3 text-right font-medium">${r.purchase_price.toFixed(2)}</td>
-                  <td className="py-2 px-3 text-right text-text-muted">${r.first_price.toFixed(2)}</td>
-                  <td className="py-2 px-3 text-right text-success font-medium">${savedAmount(r).toFixed(2)}</td>
+                  <td className="py-2 px-3 text-right font-medium">{formatMoney(r.purchase_price)}</td>
+                  <td className="py-2 px-3 text-right text-text-muted">{formatMoney(r.first_price)}</td>
+                  <td className="py-2 px-3 text-right text-success font-medium">{formatMoney(savedAmount(r))}</td>
                   <td className="py-2 px-3 text-right">{r.quantity}</td>
                   <td className="py-2 px-3 text-text-muted whitespace-nowrap">
                     {new Date(r.purchased_at).toLocaleDateString()}

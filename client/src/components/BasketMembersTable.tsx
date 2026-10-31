@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { BasketMember } from '../types';
 import { VerdictPill } from './VerdictPill';
 import { updateProjectTracker, removeProjectTracker } from '../api';
+import { formatMoney } from '../lib/money'
 
 interface Props {
   projectId: number;
@@ -57,7 +58,7 @@ export function BasketMembersTable({ projectId, members, onChange }: Props) {
               {m.tracker_name}
             </a>
             <span className="text-text font-semibold tabular-nums">
-              {m.last_price !== null ? `$${m.last_price.toFixed(2)}` : '—'}
+              {m.last_price !== null ? `${formatMoney(m.last_price)}` : '—'}
             </span>
             <VerdictPill tier={m.ai_verdict_tier} reason={m.ai_verdict_reason} size="sm" />
             {editingCeiling === m.tracker_id ? (
@@ -80,7 +81,7 @@ export function BasketMembersTable({ projectId, members, onChange }: Props) {
                 }}
                 className="text-xs px-2 py-0.5 rounded border border-border text-text-muted hover:border-primary"
               >
-                {m.per_item_ceiling !== null ? `ceiling $${m.per_item_ceiling.toFixed(2)}` : '+ ceiling'}
+                {m.per_item_ceiling !== null ? `ceiling ${formatMoney(m.per_item_ceiling)}` : '+ ceiling'}
               </button>
             )}
             <button

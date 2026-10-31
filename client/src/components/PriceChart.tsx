@@ -1,6 +1,7 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, Legend } from 'recharts'
 import type { PriceRecord } from '../types'
 import { buildChartData } from '../lib/chart-data'
+import { formatMoney, formatMoneyAxis } from '../lib/money'
 
 interface Props {
   data: PriceRecord[]
@@ -74,7 +75,7 @@ export default function PriceChart({ data, threshold }: Props) {
           stroke="#64748b"
           fontSize={12}
           tickLine={false}
-          tickFormatter={(v: number) => `$${v}`}
+          tickFormatter={(v: number) => formatMoneyAxis(v)}
         />
         <Tooltip
           contentStyle={{
@@ -89,7 +90,7 @@ export default function PriceChart({ data, threshold }: Props) {
             // the friendly hostname label for the tooltip.
             const seller = sellers.find(s => s.key === name)
             const label = seller?.label || 'Price'
-            return [`$${Number(value).toFixed(2)}`, label]
+            return [`${formatMoney(Number(value))}`, label]
           }}
           labelFormatter={(_label: unknown, payload: unknown) => {
             const items = payload as Array<{ payload: { time: string } }> | undefined

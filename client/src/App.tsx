@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
-import { BarChart3, Plus, Settings as SettingsIcon, Shield, LogOut, Menu, X, Inbox, Package, TrendingUp, ShoppingBag } from 'lucide-react'
+import { BarChart3, Plus, Settings as SettingsIcon, Shield, LogOut, Menu, X, Inbox, Package, TrendingUp, ShoppingBag, Flame } from 'lucide-react'
 import { useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminRoute from './components/AdminRoute'
@@ -47,6 +47,7 @@ const Admin = lazy(() => import('./pages/Admin'))
 const Projects = lazy(() => import('./pages/Projects'))
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
 const Purchased = lazy(() => import('./pages/Purchased'))
+const CampaignPage = lazy(() => import('./pages/Campaign'))
 const Savings = lazy(() => import('./pages/Savings'))
 const Buy = lazy(() => import('./pages/Buy'))
 
@@ -142,6 +143,7 @@ function App() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-2">
             {navLink('/', 'Dashboard', <BarChart3 className="w-4 h-4" />)}
+            {navLink('/efsane-cuma', 'Efsane Cuma', <Flame className="w-4 h-4" />)}
             {navLink('/deals', 'Deals', <TrendingUp className="w-4 h-4" />)}
             {navLink('/projects', 'Projects', <Package className="w-4 h-4" />)}
             <Link
@@ -171,6 +173,7 @@ function App() {
           <div className="md:hidden border-t border-border bg-surface">
             <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1">
               {navLink('/', 'Dashboard', <BarChart3 className="w-4 h-4" />)}
+              {navLink('/efsane-cuma', 'Efsane Cuma', <Flame className="w-4 h-4" />)}
               {navLink('/deals', 'Deals', <TrendingUp className="w-4 h-4" />)}
               {navLink('/projects', 'Projects', <Package className="w-4 h-4" />)}
               {navLink('/add', 'Add Tracker', <Plus className="w-4 h-4" />)}
@@ -213,6 +216,7 @@ function App() {
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetail /></ProtectedRoute>} />
             <Route path="/purchased" element={<ProtectedRoute><Purchased /></ProtectedRoute>} />
+            <Route path="/efsane-cuma" element={<ProtectedRoute><CampaignPage /></ProtectedRoute>} />
             <Route path="/buy/:token" element={<ProtectedRoute><Buy /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminRoute><Admin /></AdminRoute></ProtectedRoute>} />

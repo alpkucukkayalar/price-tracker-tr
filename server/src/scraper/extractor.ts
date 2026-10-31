@@ -9,6 +9,12 @@ import { extractProductTitle } from './strategies/product-title.js';
 import { extractAvailability } from './strategies/availability.js';
 import { withRetry, ScrapeError } from './retry.js';
 import { config } from '../config.js';
+import {
+  detectTurkishRetailer,
+  extractTurkishRetailerPrice,
+  extractTurkishListPrice,
+  isTurkishHost,
+} from './turkish-retailers.js';
 import { logger } from '../logger.js';
 
 export interface ExtractionResult {
@@ -23,6 +29,12 @@ export interface ExtractionResult {
    * Consumed by the share-flow name autofill via POST /test-scrape.
    */
   title: string | null;
+  /**
+   * Retailer's struck-through "original" price when the page shows one
+   * (Turkish retailers only for now). Recorded alongside the price so the
+   * campaign analysis can compare the CLAIMED discount with the real one.
+   */
+  listPrice?: number | null;
 }
 
 /**
@@ -80,20 +92,62 @@ function safeHostname(url: string): string {
 }
 
 /**
- * Parse a price string like "$1,234.56" or "1234.56" into a number.
+ * True when a price string carries a Turkish-lira marker (₺, "TL", "TRY").
+ * Turkish retailers format prices as "1.299,99 TL": dot = thousands,
+ * comma = decimal — the opposite of the US default below.
  */
-export function parsePrice(text: string): number | null {
+export function hasTurkishLiraMarker(text: string): boolean {
+  return /₺|(?:^|[\s\d])(?:TL|TRY)(?:$|[\s.,;)])/i.test(text);
+}
+
+export interface ParsePriceOptions {
+  /**
+   * 'tr' forces Turkish number format ("1.299,99" → 1299.99, "12.499" →
+   * 12499) even when the text carries no ₺/TL marker. Set by the Turkish
+   * retailer adapters, whose page fragments often omit the currency.
+   */
+  locale?: 'tr';
+}
+
+/**
+ * Turkish number format: dot is the thousands separator, comma the decimal.
+ * A dot-only string is treated as thousands when every dot group has exactly
+ * three digits ("12.499" → 12499), otherwise as a decimal point ("1299.99",
+ * as found in machine-readable attributes).
+ */
+function normalizeTurkish(cleaned: string): string {
+  if (cleaned.includes(',')) {
+    return cleaned.replace(/\./g, '').replace(/,(?=[^,]*$)/, '.').replace(/,/g, '');
+  }
+  if (cleaned.includes('.')) {
+    const groups = cleaned.split('.');
+    if (groups.slice(1).every(g => g.length === 3)) return groups.join('');
+  }
+  return cleaned;
+}
+
+/**
+ * Parse a price string like "$1,234.56", "1234.56" or "1.299,99 TL" into a
+ * number. Turkish format is used when the text has a ₺/TL/TRY marker or
+ * `opts.locale === 'tr'`.
+ */
+export function parsePrice(text: string, opts: ParsePriceOptions = {}): number | null {
   if (!text) return null;
+  const turkish = opts.locale === 'tr' || hasTurkishLiraMarker(text);
   // Remove everything except digits, dots, and commas
-  const cleaned = text.replace(/[^0-9.,]/g, '');
+  const cleaned = text.replace(/[^0-9.,]/g, '').replace(/^[.,]+|[.,]+$/g, '');
   if (!cleaned) return null;
 
-  // Handle comma as thousands separator: "1,234.56" -> "1234.56"
-  // Handle comma as decimal: "1234,56" -> "1234.56" (European)
   let normalized: string;
-  if (cleaned.includes(',') && cleaned.includes('.')) {
-    // Both present: comma is thousands separator
-    normalized = cleaned.replace(/,/g, '');
+  if (turkish) {
+    normalized = normalizeTurkish(cleaned);
+  } else if (cleaned.includes(',') && cleaned.includes('.')) {
+    // Both present: whichever separator comes LAST is the decimal point.
+    // "1,234.56" (US) → 1234.56; "1.234,56" (EU/TR) → 1234.56.
+    normalized =
+      cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')
+        ? cleaned.replace(/\./g, '').replace(',', '.')
+        : cleaned.replace(/,/g, '');
   } else if (cleaned.includes(',')) {
     // Only comma: could be thousands (1,234) or decimal (12,34)
     const parts = cleaned.split(',');
@@ -122,7 +176,13 @@ export async function extractPrice(url: string, cssSelector?: string | null): Pr
     logger.debug({ url, strategy: 'css-selector' }, 'Trying user CSS selector');
     const price = await extractWithCssSelector(url, cssSelector);
     if (price !== null) {
-      return { price, currency: 'USD', strategy: 'css-selector', finalUrl: url, title: null };
+      return {
+        price,
+        currency: isTurkishHost(url) ? 'TRY' : 'USD',
+        strategy: 'css-selector',
+        finalUrl: url,
+        title: null,
+      };
     }
     logger.debug({ url }, 'User CSS selector failed, falling back to pipeline');
   }
@@ -164,6 +224,26 @@ export async function extractPrice(url: string, cssSelector?: string | null): Pr
     isPageWideRegexUnsafeHost(safeHostname(finalUrl)) ||
     isPageWideRegexUnsafeHost(safeHostname(url));
 
+  // Turkish retailers: site-specific extraction first (it also yields the
+  // struck-through list price), then the generic structured-data pipeline.
+  const trRetailer = detectTurkishRetailer(finalUrl) ?? detectTurkishRetailer(url);
+  const turkish = trRetailer !== null || isTurkishHost(finalUrl) || isTurkishHost(url);
+  const currency = turkish ? 'TRY' : 'USD';
+  if (trRetailer) {
+    const tr = extractTurkishRetailerPrice(html, trRetailer);
+    if (tr && tr.price >= 0.01 && tr.price <= 9_999_999) {
+      logger.info({ url, strategy: tr.source, price: tr.price, listPrice: tr.listPrice }, 'Price extracted');
+      return {
+        price: tr.price,
+        currency,
+        strategy: tr.source,
+        finalUrl,
+        title: extractProductTitle(html),
+        listPrice: tr.listPrice,
+      };
+    }
+  }
+
   const strategies: { name: string; fn: () => number | null }[] = [
     { name: 'json-ld', fn: () => extractFromJsonLd(html) },
     { name: 'microdata', fn: () => extractFromMicrodata(html) },
@@ -172,7 +252,7 @@ export async function extractPrice(url: string, cssSelector?: string | null): Pr
   ];
   // Page-wide regex fallback runs only on non-Amazon hosts. See
   // isPageWideRegexUnsafeHost above for the rationale.
-  if (!onAmazonHost) {
+  if (!onAmazonHost && !turkish) {
     strategies.push({ name: 'regex', fn: () => extractFromRegex(html) });
   }
 
@@ -186,7 +266,14 @@ export async function extractPrice(url: string, cssSelector?: string | null): Pr
         logger.warn({ url, strategy: name, price }, 'Price outside sanity range, skipping');
         continue;
       }
-      return { price, currency: 'USD', strategy: name, finalUrl, title: extractProductTitle(html) };
+      return {
+        price,
+        currency,
+        strategy: name,
+        finalUrl,
+        title: extractProductTitle(html),
+        listPrice: trRetailer ? extractTurkishListPrice(html, trRetailer, price) : undefined,
+      };
     }
   }
 

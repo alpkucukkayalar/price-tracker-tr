@@ -1,4 +1,5 @@
 import type { ProjectNotificationRecord } from '../types';
+import { formatMoney } from '../lib/money'
 
 interface Props {
   notifications: ProjectNotificationRecord[];
@@ -31,7 +32,7 @@ export function RecentAlertsSection({ notifications }: Props) {
           <span>•</span>
           <span>{formatRelative(n.sent_at)}</span>
           <span className="text-text">{CHANNEL_LABELS[n.channel] ?? n.channel}</span>
-          <span>${n.basket_total.toFixed(2)} → fired</span>
+          <span>{formatMoney(n.basket_total)} → fired</span>
           {n.ai_commentary && <span className="italic">"{n.ai_commentary}"</span>}
         </li>
       ))}

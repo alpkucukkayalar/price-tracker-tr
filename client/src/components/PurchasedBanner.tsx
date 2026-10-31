@@ -1,6 +1,7 @@
 import { CheckCircle } from 'lucide-react';
 import type { Purchase } from '../types';
 import { savedAmount } from '../types';
+import { formatMoney } from '../lib/money'
 
 interface Props {
   purchase: Purchase;
@@ -27,8 +28,8 @@ export default function PurchasedBanner({ purchase, totalPurchases, onViewAll }:
         <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
         <span>
           Purchased on {date} — saved{' '}
-          <span className="font-semibold text-success">${saved.toFixed(2)}</span>{' '}
-          <span className="text-text-muted">({purchase.quantity} × ${purchase.purchase_price.toFixed(2)})</span>
+          <span className="font-semibold text-success">{formatMoney(saved)}</span>{' '}
+          <span className="text-text-muted">({purchase.quantity} × {formatMoney(purchase.purchase_price)})</span>
         </span>
       </div>
       {totalPurchases > 1 && onViewAll && (

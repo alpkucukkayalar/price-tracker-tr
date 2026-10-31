@@ -1,4 +1,4 @@
-import type { Tracker, PriceRecord, ScrapeResult, User, InviteCode, SetupStatus, Overlap, Project, BasketMember, ProjectDetail, WebPushDevice, SubscribePayload, TrackerUrlCondition, Purchase, PurchaseWithTracker, SavingsSummary, TrackerPriceStats } from './types';
+import type { Tracker, PriceRecord, ScrapeResult, User, InviteCode, SetupStatus, Overlap, Project, BasketMember, ProjectDetail, WebPushDevice, SubscribePayload, TrackerUrlCondition, Purchase, PurchaseWithTracker, SavingsSummary, TrackerPriceStats, TrackerCampaign, CampaignOverview } from './types';
 
 const BASE = '/api';
 
@@ -125,6 +125,11 @@ export const getTrackerStats = () =>
 // getTrackerStats above, which is the dashboard sparkline batch endpoint.
 export const getTrackerPriceStats = (id: number) =>
   request<TrackerPriceStats>(`/trackers/${id}/stats`);
+// Efsane Cuma / Black Friday fake-discount analysis (Turkish fork).
+export const getTrackerCampaign = (id: number) =>
+  request<TrackerCampaign>(`/trackers/${id}/campaign`);
+export const getCampaignOverview = () =>
+  request<CampaignOverview>('/trackers/campaign');
 
 // Notifications
 export interface NotificationHistoryRow {

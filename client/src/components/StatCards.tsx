@@ -4,6 +4,7 @@ import type { Tracker } from '../types'
 import { getTier, pickSaying, type SavingsTier } from '../lib/savings-tiers'
 import type { DashboardFilter } from '../lib/dashboard-filter'
 import CountUp from './bits/CountUp'
+import { formatMoney } from '../lib/money'
 
 // SavingsCelebration pulls in canvas-confetti (~4 KB gzipped but bigger
 // raw). Lazy load so the Dashboard's initial render doesn't pay the cost
@@ -122,7 +123,7 @@ export default function StatCards({ trackers, counts, onSelectFilter }: Props) {
               <div>
                 <div className="text-xl font-bold">
                   {s.isSavings
-                    ? (totalSavings > 0 ? <CountUp value={totalSavings} prefix="$" decimals={2} /> : '--')
+                    ? (totalSavings > 0 ? <CountUp value={totalSavings} format={formatMoney} /> : '--')
                     : <CountUp value={s.count} />}
                 </div>
                 <div className="text-xs text-text-muted">{s.label}</div>

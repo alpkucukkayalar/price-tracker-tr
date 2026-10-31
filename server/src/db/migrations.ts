@@ -727,6 +727,17 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    version: 23,
+    description: 'Turkish retailers: price_history.list_price (claimed "original" price) for fake-discount analysis',
+    up: () => {
+      const db = getDb();
+      const cols = (db.pragma('table_info(price_history)') as { name: string }[]).map(c => c.name);
+      if (!cols.includes('list_price')) {
+        db.prepare('ALTER TABLE price_history ADD COLUMN list_price REAL').run();
+      }
+    },
+  },
 ];
 
 export function runMigrations(): void {

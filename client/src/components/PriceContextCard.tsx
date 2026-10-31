@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { TrendingDown } from 'lucide-react'
 import { getTrackerPriceStats, updateTracker } from '../api'
 import type { Tracker, TrackerPriceStats } from '../types'
+import { formatMoney } from '../lib/money'
 
 interface Props {
   tracker: Tracker
@@ -16,7 +17,7 @@ const MODE_LABELS: Record<'all' | 'record_only' | 'off', string> = {
 }
 
 function money(v: number | null): string {
-  return v === null ? '—' : `$${v.toFixed(2)}`
+  return v === null ? '—' : `${formatMoney(v)}`
 }
 
 /**

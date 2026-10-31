@@ -7,6 +7,7 @@ import {
   unclaimWishlistItem,
   type PublicWishlist,
 } from '../api';
+import { formatMoney } from '../lib/money'
 
 /**
  * Imperatively set <title> + <meta> tags. Mirrors PublicProduct's setMeta —
@@ -27,7 +28,7 @@ function setMeta(name: string, content: string): void {
 
 function formatPrice(value: number | null): string {
   if (value === null) return '—';
-  return `$${value.toFixed(2)}`;
+  return `${formatMoney(value)}`;
 }
 
 type LoadState =

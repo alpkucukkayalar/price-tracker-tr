@@ -4,6 +4,7 @@ import { Search, Loader2, CheckCircle } from 'lucide-react'
 import { createTracker, testScrape, getTrackerUrls, updateTrackerUrlCondition } from '../api'
 import type { ScrapeResult, TrackerUrlCondition } from '../types'
 import useTitle from '../useTitle'
+import { formatMoney } from '../lib/money'
 
 export default function AddTracker() {
   useTitle('Add Tracker')
@@ -126,7 +127,7 @@ export default function AddTracker() {
           ) : (
             <div className="mt-2 flex items-center gap-2 text-sm text-success bg-success/10 rounded-lg px-3 py-2">
               <CheckCircle className="w-4 h-4" />
-              Found: ${testResult.price!.toFixed(2)} (via {testResult.strategy})
+              Found: {formatMoney(testResult.price!)} (via {testResult.strategy})
             </div>
           ))}
           {testError && (

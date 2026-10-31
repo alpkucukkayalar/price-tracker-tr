@@ -96,6 +96,15 @@ export const config = {
   // deal sitting below threshold doesn't nag every cron tick.
   armExpiryHours: parseInt(process.env.ARM_EXPIRY_HOURS || '24', 10),
   reArmCooldownHours: parseInt(process.env.RE_ARM_COOLDOWN_HOURS || '24', 10),
+  // Kampanya (Efsane Cuma / Black Friday) fake-discount analysis. Dates are
+  // Europe/Istanbul calendar days, end inclusive. During the window (plus
+  // CAMPAIGN_BOOST_LEAD_DAYS before it) every tracker is checked at least
+  // every CAMPAIGN_CHECK_INTERVAL_MINUTES; 0 disables the boost.
+  campaignName: process.env.CAMPAIGN_NAME || 'Efsane Cuma / Black Friday 2026',
+  campaignStart: process.env.CAMPAIGN_START || '2026-11-27',
+  campaignEnd: process.env.CAMPAIGN_END || '2026-11-30',
+  campaignCheckIntervalMinutes: parseInt(process.env.CAMPAIGN_CHECK_INTERVAL_MINUTES || '60', 10),
+  campaignBoostLeadDays: parseInt(process.env.CAMPAIGN_BOOST_LEAD_DAYS || '1', 10),
 };
 
 if (config.isProduction && !process.env.JWT_SECRET) {

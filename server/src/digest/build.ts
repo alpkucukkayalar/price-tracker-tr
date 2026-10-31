@@ -6,6 +6,7 @@
  * assembly, and the text/HTML renderers. Data gathering lives in data.ts,
  * scheduling in cron.ts.
  */
+import { formatMoney } from '../lib/money.js';
 
 export const DIGEST_TZ = 'America/Chicago';
 
@@ -128,7 +129,7 @@ const TIER_SHORT: Record<string, string> = {
   low_all_time: 'ALL-TIME low',
 };
 
-const money = (v: number): string => `$${v.toFixed(2)}`;
+const money = (v: number): string => `${formatMoney(v)}`;
 
 /**
  * Plain-text/markdown-ish rendering for ntfy, Discord, and the generic

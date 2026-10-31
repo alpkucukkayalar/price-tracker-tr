@@ -6,6 +6,8 @@ import Sparkline from './Sparkline'
 import { VerdictPill } from './VerdictPill'
 import { checkTracker } from '../api'
 import { useState } from 'react'
+import { formatMoney } from '../lib/money'
+import { detectRetailer, RETAILER_META } from '../lib/campaign'
 
 /**
  * Mirrors the server-side isDoorbusterActive() helper in queries.ts. The
@@ -134,7 +136,10 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
               className="w-3.5 h-3.5 rounded-sm flex-shrink-0"
               onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
-            {getHostname(tracker.url)}
+            {(() => {
+              const r = detectRetailer(tracker.url)
+              return r ? <span style={{ color: RETAILER_META[r].color }}>{RETAILER_META[r].label}</span> : getHostname(tracker.url)
+            })()}
             <ExternalLink className="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
         </div>
@@ -145,7 +150,7 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
         <div className="min-w-0">
           <div className="flex items-baseline gap-2 flex-wrap">
             <div className={`text-3xl font-bold tracking-tight ${belowThreshold ? 'text-success' : 'text-text'}`}>
-              {tracker.last_price != null ? `$${tracker.last_price.toFixed(2)}` : '--'}
+              {tracker.last_price != null ? `${formatMoney(tracker.last_price)}` : '--'}
             </div>
             <VerdictPill tier={tracker.ai_verdict_tier ?? null} reason={tracker.ai_verdict_reason ?? null} />
           </div>
@@ -157,13 +162,13 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
           <div className="text-xs text-text-muted mt-0.5 flex items-center gap-2 flex-wrap">
             {tracker.threshold_price && (
               <span>
-                Target: <span className="text-warning">${tracker.threshold_price.toFixed(2)}</span>
+                Target: <span className="text-warning">{formatMoney(tracker.threshold_price)}</span>
               </span>
             )}
             {minPrice != null && (
               <span title="All-time low recorded for this tracker">
                 Low: <span className={atHistoricalLow ? 'text-success font-semibold' : 'text-text'}>
-                  ${minPrice.toFixed(2)}
+                  {formatMoney(minPrice)}
                 </span>
               </span>
             )}

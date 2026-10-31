@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Tracker } from '../types';
 import { addProjectTracker } from '../api';
+import { formatMoney } from '../lib/money'
 
 interface Props {
   projectId: number;
@@ -73,7 +74,7 @@ export function AddTrackerModal({ projectId, excludeIds, onClose, onAdded }: Pro
               >
                 <div className="font-medium">{t.name}</div>
                 <div className="text-xs text-text-muted">
-                  {t.last_price !== null ? `$${t.last_price.toFixed(2)}` : '—'}
+                  {t.last_price !== null ? `${formatMoney(t.last_price)}` : '—'}
                 </div>
               </button>
             ))
