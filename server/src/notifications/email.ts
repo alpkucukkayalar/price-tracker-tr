@@ -1,3 +1,4 @@
+import { formatMoney } from '../lib/money.js';
 import nodemailer, { Transporter } from 'nodemailer';
 import { config, isEmailConfigured } from '../config.js';
 import { logger } from '../logger.js';
@@ -56,10 +57,6 @@ function hostOf(url: string): string {
   } catch {
     return '';
   }
-}
-
-function formatMoney(n: number): string {
-  return `$${n.toFixed(2)}`;
 }
 
 function priceAlertText(

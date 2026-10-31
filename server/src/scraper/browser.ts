@@ -2,6 +2,7 @@ import { chromium, Browser, BrowserContext } from 'playwright';
 import { getNextUserAgent } from './user-agents.js';
 import { ScrapeError } from './retry.js';
 import { logger } from '../logger.js';
+import { isTurkishHost } from './turkish-retailers.js';
 
 // --- hard timeouts -----------------------------------------------------------
 // One wedged page or an unresponsive Chromium must never hang a scrape — or the
@@ -63,12 +64,16 @@ async function getBrowser(): Promise<Browser> {
   return browser;
 }
 
-export async function createContext(): Promise<BrowserContext> {
+export async function createContext(url?: string): Promise<BrowserContext> {
   const b = await getBrowser();
+  // Turkish retailers serve TRY prices and Turkish markup to a tr-TR,
+  // Istanbul-timezone browser; some redirect en-US sessions to a global site.
+  const turkish = url ? isTurkishHost(url) : false;
   return b.newContext({
     userAgent: getNextUserAgent(),
     viewport: { width: 1920, height: 1080 },
-    locale: 'en-US',
+    locale: turkish ? 'tr-TR' : 'en-US',
+    ...(turkish ? { timezoneId: 'Europe/Istanbul' } : {}),
   });
 }
 
@@ -200,7 +205,7 @@ async function loadPage(context: BrowserContext, url: string): Promise<FetchResu
  * the retryable flag.
  */
 export async function fetchPageContent(url: string): Promise<FetchResult> {
-  const context = await createContext();
+  const context = await createContext(url);
   let hardTimedOut = false;
   try {
     return await withTimeout(loadPage(context, url), SCRAPE_HARD_TIMEOUT_MS, `scrape ${url}`);

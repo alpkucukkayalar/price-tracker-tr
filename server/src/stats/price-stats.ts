@@ -10,6 +10,7 @@
  * All functions are pure (no DB, no clock reads) so they are trivially
  * unit-testable; callers pass `nowMs` explicitly.
  */
+import { formatMoney } from '../lib/money.js';
 
 export type LowTier = 'low_30d' | 'low_90d' | 'low_all_time';
 export type LowAlertMode = 'all' | 'record_only' | 'off';
@@ -212,6 +213,6 @@ export function formatLowContext(tier: LowTier, stats: PriceStats): string {
     tier === 'low_all_time' ? stats.all.min :
     tier === 'low_90d' ? stats.w90.min :
     stats.w30.min;
-  const prevPart = prev !== null ? `prev. $${prev.toFixed(2)} · ` : '';
+  const prevPart = prev !== null ? `prev. ${formatMoney(prev)} · ` : '';
   return `${TIER_LABEL[tier]} (${prevPart}${stats.spanDays} days tracked)`;
 }

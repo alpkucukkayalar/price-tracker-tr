@@ -5,6 +5,7 @@ import { sendEmailPurchaseArm } from './email.js';
 import { sendGenericPurchaseArm } from './webhook.js';
 import type { EnabledChannels } from '../scheduler/cron.js';
 import { logger } from '../logger.js';
+import { formatMoney } from '../lib/money.js';
 
 export function purchaseArmContent(
   trackerName: string,
@@ -14,7 +15,7 @@ export function purchaseArmContent(
 ): { title: string; body: string } {
   return {
     title: `🛒 Ready to buy: ${trackerName}`,
-    body: `${trackerName} hit $${currentPrice.toFixed(2)} (your buy limit $${threshold.toFixed(2)}). Approve → ${buyUrl}`,
+    body: `${trackerName} hit ${formatMoney(currentPrice)} (your buy limit ${formatMoney(threshold)}). Approve → ${buyUrl}`,
   };
 }
 

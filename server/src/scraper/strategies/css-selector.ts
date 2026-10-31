@@ -2,13 +2,14 @@ import { chromium } from 'playwright';
 import { createContext } from '../browser.js';
 import { parsePrice } from '../extractor.js';
 import { logger } from '../../logger.js';
+import { isTurkishHost } from '../turkish-retailers.js';
 
 /**
  * Extract price using a user-provided CSS selector.
  * This re-fetches the page with Playwright to use real DOM querying.
  */
 export async function extractWithCssSelector(url: string, selector: string): Promise<number | null> {
-  const context = await createContext();
+  const context = await createContext(url);
   try {
     const page = await context.newPage();
 
@@ -29,7 +30,7 @@ export async function extractWithCssSelector(url: string, selector: string): Pro
     const text = await element.textContent();
     if (!text) return null;
 
-    return parsePrice(text);
+    return parsePrice(text, isTurkishHost(url) ? { locale: 'tr' } : {});
   } catch (err) {
     logger.error({ err, url, selector }, 'CSS selector extraction failed');
     return null;

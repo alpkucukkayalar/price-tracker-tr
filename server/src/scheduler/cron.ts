@@ -46,6 +46,7 @@ import { generateVerdictForTracker, generateAlertCopy, computeSignalsAndVerdictF
 import { computeConfidence } from '../ai/confidence.js';
 import type { Confidence } from '../ai/confidence.js';
 import { evaluateAndFireForProject } from '../projects/firer.js';
+import { formatMoney } from '../lib/money.js';
 
 const PUBLIC_ORIGIN = 'https://prices.schultzsolutions.tech';
 
@@ -427,7 +428,7 @@ export async function checkTrackerUrl(
       // this tracker's rows.
       const priorDailyMins = getDailyMinHistoryForTracker(tracker.id);
 
-      addPriceRecord(tracker.id, result.price, result.currency, seller.id);
+      addPriceRecord(tracker.id, result.price, result.currency, seller.id, result.listPrice ?? null);
 
       // A successfully priced page is an in-stock signal (phase 4). The
       // prior state decides whether this scrape is a restock transition;
@@ -537,7 +538,7 @@ export async function checkTrackerUrl(
               : '';
           const restockInfo: LowAlert = {
             tier: 'back_in_stock',
-            context: `Back in stock at $${result.price.toFixed(2)}${targetNote}`,
+            context: `Back in stock at ${formatMoney(result.price)}${targetNote}`,
           };
           const sentChannels = await firePriceAlerts(restockTracker, result.price, channels, seller, bypassCooldown, restockInfo);
           for (const channel of sentChannels) {

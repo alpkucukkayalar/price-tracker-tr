@@ -10,7 +10,10 @@ import {
   searchTrackersByName,
 } from '../db/queries.js';
 import { checkTracker, checkTrackerUrl } from '../scheduler/cron.js';
-import { getDailyMinHistoryForTracker, getRecentLowTiers, getTrackerIdByNormalizedUrl } from '../db/queries.js';
+import { getDailyMinHistoryForTracker, getRecentLowTiers, getTrackerIdByNormalizedUrl, getCampaignDailyHistory } from '../db/queries.js';
+import { analyzeCampaign } from '../campaign/analysis.js';
+import { getCampaign, istanbulToday } from '../campaign/config.js';
+import { detectTurkishRetailer } from '../scraper/turkish-retailers.js';
 import { normalizeTrackerUrl } from '../lib/normalize-url.js';
 import {
   computePriceStats,
@@ -91,6 +94,25 @@ router.get('/', (req: Request, res: Response) => {
       recent_low_tier: lowTiers.get(t.id) ?? null,
     })),
   );
+});
+
+// Efsane Cuma / Black Friday fake-discount analysis for every tracker.
+router.get('/campaign', (req: Request, res: Response) => {
+  const campaign = getCampaign();
+  const today = istanbulToday();
+  const trackers = getAllTrackers(req.user!.userId);
+  res.json({
+    campaign,
+    today,
+    trackers: trackers.map(t => ({
+      id: t.id,
+      name: t.name,
+      url: t.url,
+      retailer: detectTurkishRetailer(t.url),
+      last_price: t.last_price,
+      analysis: analyzeCampaign(getCampaignDailyHistory(t.id), campaign, today),
+    })),
+  });
 });
 
 router.get('/sparklines', (req: Request, res: Response) => {
@@ -191,6 +213,20 @@ router.get('/:id/stats', (req: Request, res: Response) => {
         ? percentileRank90d(dailyMins, Date.now(), tracker.last_price)
         : null,
     low_alert_mode: tracker.low_alert_mode,
+  });
+});
+
+router.get('/:id/campaign', (req: Request, res: Response) => {
+  const tracker = getTrackerById(Number(req.params.id), req.user!.userId);
+  if (!tracker) {
+    res.status(404).json({ error: 'Tracker not found' });
+    return;
+  }
+  const history = getCampaignDailyHistory(tracker.id);
+  res.json({
+    retailer: detectTurkishRetailer(tracker.url),
+    history,
+    analysis: analyzeCampaign(history, getCampaign(), istanbulToday()),
   });
 });
 

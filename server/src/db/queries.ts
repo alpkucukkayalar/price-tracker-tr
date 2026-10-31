@@ -1,4 +1,5 @@
 import { getDb } from './connection.js';
+import { campaignBoostIntervalMinutes } from '../campaign/config.js';
 import { normalizeTrackerUrl } from '../lib/normalize-url.js';
 import { buildSlug } from '../lib/build-slug.js';
 import { randomBytes, createHash } from 'crypto';
@@ -152,6 +153,8 @@ export interface PriceRecord {
   price: number;
   currency: string;
   scraped_at: string;
+  /** Retailer's struck-through "original" price at scrape time (migration v23). */
+  list_price?: number | null;
 }
 
 export interface NotificationRecord {
@@ -456,11 +459,15 @@ export function getDueTrackerUrls(): DueTrackerUrl[] {
                AND t.doorbuster_end_at IS NOT NULL
                AND datetime('now') BETWEEN datetime(t.doorbuster_start_at) AND datetime(t.doorbuster_end_at)
              THEN t.doorbuster_interval_minutes
+             -- Campaign (Efsane Cuma) boost: cap the normal cadence while
+             -- the global campaign window is running. NULL = no boost.
+             WHEN @boost IS NOT NULL AND @boost < (t.check_interval_minutes + t.jitter_minutes)
+             THEN @boost
              ELSE (t.check_interval_minutes + t.jitter_minutes)
            END || ' minutes'
          ) <= datetime('now')
     )
-  `).all() as DueTrackerUrl[];
+  `).all({ boost: campaignBoostIntervalMinutes() }) as DueTrackerUrl[];
 }
 
 export function getTrackerUrlById(id: number): TrackerUrl | undefined {
@@ -699,12 +706,13 @@ export function addPriceRecord(
   price: number,
   currency: string = 'USD',
   trackerUrlId: number | null = null,
+  listPrice: number | null = null,
 ): PriceRecord {
   const stmt = getDb().prepare(`
-    INSERT INTO price_history (tracker_id, tracker_url_id, price, currency)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO price_history (tracker_id, tracker_url_id, price, currency, list_price)
+    VALUES (?, ?, ?, ?, ?)
   `);
-  const result = stmt.run(trackerId, trackerUrlId, price, currency);
+  const result = stmt.run(trackerId, trackerUrlId, price, currency, listPrice);
   return getDb().prepare('SELECT * FROM price_history WHERE id = ?').get(Number(result.lastInsertRowid)) as PriceRecord;
 }
 
@@ -2112,4 +2120,29 @@ export function getSavingsSummary(): SavingsSummary {
   };
 }
 
+// --- Campaign (Efsane Cuma) analysis ---
 
+/**
+ * One row per Europe/Istanbul calendar day: the lowest price across the
+ * tracker's new-condition sellers, plus the struck-through list price
+ * shown on that same cheapest offer. Same seller filter as
+ * getDailyMinHistoryForTracker.
+ */
+export function getCampaignDailyHistory(
+  trackerId: number,
+): Array<{ date: string; price: number; listPrice: number | null }> {
+  return getDb().prepare(`
+    SELECT DATE(ph.scraped_at, '+3 hours') AS date,
+           MIN(ph.price) AS price,
+           -- SQLite bare-column rule: with MIN(), list_price comes from the
+           -- same row as the minimum price, so the claim belongs to that offer.
+           ph.list_price AS listPrice
+    FROM price_history ph
+    LEFT JOIN tracker_urls tu ON tu.id = ph.tracker_url_id
+    WHERE ph.tracker_id = ?
+      AND ph.price > 0
+      AND (ph.tracker_url_id IS NULL OR tu.condition = 'new')
+    GROUP BY DATE(ph.scraped_at, '+3 hours')
+    ORDER BY date ASC
+  `).all(trackerId) as Array<{ date: string; price: number; listPrice: number | null }>;
+}

@@ -36,8 +36,8 @@ export async function sendDiscordPriceAlert(
   ];
   if (tracker.threshold_price) {
     fields.push(
-      { name: 'Threshold', value: `$${tracker.threshold_price.toFixed(2)}`, inline: true },
-      { name: 'Savings', value: `$${(tracker.threshold_price - currentPrice).toFixed(2)}`, inline: true },
+      { name: 'Threshold', value: `${formatMoney(tracker.threshold_price)}`, inline: true },
+      { name: 'Savings', value: `${formatMoney((tracker.threshold_price - currentPrice))}`, inline: true },
     );
   }
   if (low) {
@@ -154,6 +154,7 @@ export async function sendDiscordErrorAlert(
 }
 
 import type { Project, BasketState, BasketMember } from '../projects/types.js';
+import { formatMoney } from '../lib/money.js';
 
 export async function sendDiscordBasketAlert(
   project: Project,
@@ -163,9 +164,9 @@ export async function sendDiscordBasketAlert(
   aiCommentary?: string | null,
 ): Promise<boolean> {
   if (basket.total === null) return false;
-  const savings = (project.target_total - basket.total).toFixed(2);
+  const savings = formatMoney(project.target_total - basket.total);
   const memberLines = members
-    .map(m => `• ${m.tracker_name} — $${(m.last_price ?? 0).toFixed(2)}`)
+    .map(m => `• ${m.tracker_name} — ${formatMoney((m.last_price ?? 0))}`)
     .join('\n');
   const baseDescription = `${memberLines}`;
   const description = aiCommentary
@@ -177,9 +178,9 @@ export async function sendDiscordBasketAlert(
     color: 0x00c853,
     description,
     fields: [
-      { name: 'Total', value: `$${basket.total.toFixed(2)}`, inline: true },
-      { name: 'Target', value: `$${project.target_total.toFixed(2)}`, inline: true },
-      { name: 'Savings', value: `$${savings}`, inline: true },
+      { name: 'Total', value: `${formatMoney(basket.total)}`, inline: true },
+      { name: 'Target', value: `${formatMoney(project.target_total)}`, inline: true },
+      { name: 'Savings', value: savings, inline: true },
       { name: 'Items', value: String(basket.item_count), inline: true },
     ],
   };
@@ -207,7 +208,7 @@ export async function sendDiscordPurchaseArm(
   const embed = {
     title: `🛒 Ready to buy: ${trackerName}`,
     color: 0xff9900,
-    description: `Hit **$${currentPrice.toFixed(2)}** (your limit $${threshold.toFixed(2)}).`,
+    description: `Hit **${formatMoney(currentPrice)}** (your limit ${formatMoney(threshold)}).`,
     fields: [{ name: 'Approve', value: `[Review & buy →](${buyUrl})` }],
   };
   try {

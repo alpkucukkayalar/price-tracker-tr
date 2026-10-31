@@ -10,6 +10,7 @@ import type { Tracker, TrackerUrlCondition } from '../db/queries.js';
 import type { Confidence } from '../ai/confidence.js';
 import type { Project, BasketState, BasketMember } from '../projects/types.js';
 import { formatPriceWithCondition } from './condition-label.js';
+import { formatMoney } from '../lib/money.js';
 
 function webPushBodyPrefix(level: Confidence['level']): string {
   if (level === 'HIGH') return '🟢 ';
@@ -100,7 +101,7 @@ export async function sendWebPushPriceAlert(
   // the user only sees the lock-screen preview (title) or expands.
   const title = `${formatPriceWithCondition(currentPrice, condition)} — ${tracker.name}`;
   const baseBody = tracker.last_price !== null && tracker.last_price > currentPrice
-    ? `Down from $${tracker.last_price.toFixed(2)}`
+    ? `Down from ${formatMoney(tracker.last_price)}`
     : `Now at ${formatPriceWithCondition(currentPrice, condition)}`;
 
   const prefix = confidence ? webPushBodyPrefix(confidence.level) : '';
@@ -131,7 +132,7 @@ export async function sendWebPushPurchaseArm(
 ): Promise<boolean> {
   return dispatchToAllSubs(userId, {
     title: `🛒 Ready to buy: ${trackerName}`,
-    body: `Hit $${currentPrice.toFixed(2)} (limit $${threshold.toFixed(2)}). Tap to review & buy.`,
+    body: `Hit ${formatMoney(currentPrice)} (limit ${formatMoney(threshold)}). Tap to review & buy.`,
     url: buyUrl,
     tag: `purchase-arm-${userId}`,
   });
@@ -147,7 +148,7 @@ export async function sendWebPushBasketAlert(
   if (basket.total === null) return false;
 
   const title = `Bundle Ready: ${project.name}`;
-  const baseBody = `$${basket.total.toFixed(2)} / $${project.target_total.toFixed(2)} target (${basket.item_count} items)`;
+  const baseBody = `${formatMoney(basket.total)} / ${formatMoney(project.target_total)} target (${basket.item_count} items)`;
   const body = aiCommentary ? `${baseBody} — ${aiCommentary}` : baseBody;
 
   return dispatchToAllSubs(userId, {

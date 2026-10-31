@@ -11,6 +11,7 @@
 // See docs/superpowers/specs/2026-05-06-confidence-scored-alerts-design.md
 
 import type { Signals } from './types.js';
+import { formatMoney } from '../lib/money.js';
 
 export type ConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW';
 
@@ -81,7 +82,7 @@ function buildReasons(signals: Signals): string[] {
     signals.vs_all_time_low !== 1.0
   ) {
     const months = Math.round(signals.days_since_all_time_low / 30);
-    reasons.push(`first time below $${signals.current_price.toFixed(2)} in ${months}+ months`);
+    reasons.push(`first time below ${formatMoney(signals.current_price)} in ${months}+ months`);
   }
 
   // Rule 7: average dwell at low

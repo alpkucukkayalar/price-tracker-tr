@@ -114,7 +114,7 @@ export async function sendNtfyPriceAlert(
 
   // formatPriceWithCondition tags non-'new' conditions: "Now $239 (Warehouse)".
   const baseMessage = tracker.threshold_price
-    ? `Now ${formatPriceWithCondition(currentPrice, condition)} (target $${tracker.threshold_price.toFixed(2)}, save $${(tracker.threshold_price - currentPrice).toFixed(2)})`
+    ? `Now ${formatPriceWithCondition(currentPrice, condition)} (target ${formatMoney(tracker.threshold_price)}, save ${formatMoney((tracker.threshold_price - currentPrice))})`
     : `Now ${formatPriceWithCondition(currentPrice, condition)}`;
   const messageParts: string[] = [baseMessage];
   if (low) messageParts.push(`${low.tier === 'back_in_stock' ? '📦' : '📉'} ${low.context}`);
@@ -206,6 +206,7 @@ export async function sendNtfyErrorAlert(
 }
 
 import type { Project as ProjectType, BasketState as BasketStateType, BasketMember as BasketMemberType } from '../projects/types.js';
+import { formatMoney } from '../lib/money.js';
 
 export async function sendNtfyBasketAlert(
   project: ProjectType,
@@ -223,11 +224,11 @@ export async function sendNtfyBasketAlert(
     logger.error({ err, projectId: project.id }, 'Invalid ntfy URL');
     return false;
   }
-  const savings = (project.target_total - basket.total).toFixed(2);
+  const savings = formatMoney(project.target_total - basket.total);
   const memberLines = members
-    .map(m => `• ${m.tracker_name} — $${(m.last_price ?? 0).toFixed(2)}`)
+    .map(m => `• ${m.tracker_name} — ${formatMoney((m.last_price ?? 0))}`)
     .join('\n');
-  const baseBody = `Total: $${basket.total.toFixed(2)} (target $${project.target_total.toFixed(2)}, savings $${savings})\n\n${memberLines}`;
+  const baseBody = `Total: ${formatMoney(basket.total)} (target ${formatMoney(project.target_total)}, savings ${savings})\n\n${memberLines}`;
   const message = aiCommentary ? `${baseBody}\n\n${aiCommentary}` : baseBody;
 
   const result = await publish(target.base, {
@@ -265,7 +266,7 @@ export async function sendNtfyPurchaseArm(
   const result = await publish(target.base, {
     topic: target.topic,
     title: `Ready to buy: ${trackerName}`,
-    message: `${trackerName} hit $${currentPrice.toFixed(2)} (limit $${threshold.toFixed(2)}).`,
+    message: `${trackerName} hit ${formatMoney(currentPrice)} (limit ${formatMoney(threshold)}).`,
     priority: 4,
     tags: ['shopping_cart'],
     click: buyUrl,

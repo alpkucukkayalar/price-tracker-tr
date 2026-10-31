@@ -5,6 +5,7 @@
 // unchanged when the winning URL is new".
 
 import type { TrackerUrlCondition } from '../db/queries.js';
+import { formatMoney } from '../lib/money.js';
 
 const CONDITION_LABEL: Record<TrackerUrlCondition, string> = {
   new: '',
@@ -28,6 +29,6 @@ export function formatPriceWithCondition(
   condition: TrackerUrlCondition | undefined | null,
 ): string {
   const label = conditionLabel(condition);
-  const base = `$${price.toFixed(2)}`;
+  const base = `${formatMoney(price)}`;
   return label ? `${base} (${label})` : base;
 }
