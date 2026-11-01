@@ -6,6 +6,11 @@ import { RETAILER_META } from '../lib/campaign'
 import { formatMoney } from '../lib/money'
 import { tl } from '../lib/i18n'
 
+const STORE_META: Record<string, { label: string; color: string }> = {
+  ...RETAILER_META,
+  akakce: { label: 'Akakçe (tüm mağazaların en ucuzu)', color: '#e11d48' },
+}
+
 interface Props {
   trackerId: number
   trackerName: string
@@ -83,8 +88,8 @@ export default function FindElsewhere({ trackerId, trackerName, onAdded }: Props
           )}
           {data.results.map(r => (
             <div key={r.retailer}>
-              <div className="text-xs font-semibold mb-1" style={{ color: RETAILER_META[r.retailer].color }}>
-                {RETAILER_META[r.retailer].label}
+              <div className="text-xs font-semibold mb-1" style={{ color: STORE_META[r.retailer].color }}>
+                {STORE_META[r.retailer].label}
               </div>
               {r.error ? (
                 <p className="text-xs text-text-muted">{tl('Could not search this store', 'Bu sitede arama yapılamadı')}: {r.error.slice(0, 120)}</p>

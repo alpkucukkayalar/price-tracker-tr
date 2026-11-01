@@ -14,7 +14,7 @@ import { getDailyMinHistoryForTracker, getRecentLowTiers, getTrackerIdByNormaliz
 import { analyzeCampaign } from '../campaign/analysis.js';
 import { getCampaign, istanbulToday } from '../campaign/config.js';
 import { runCampaignReportForUser, type ReportKind } from '../campaign/report.js';
-import { detectTurkishRetailer } from '../scraper/turkish-retailers.js';
+import { cleanProductUrl, detectTurkishRetailer } from '../scraper/turkish-retailers.js';
 import { normalizeTrackerUrl } from '../lib/normalize-url.js';
 import {
   computePriceStats,
@@ -39,7 +39,7 @@ const router = Router();
 
 const createSchema = z.object({
   name: z.string().min(1).max(200),
-  url: z.string().url(),
+  url: z.string().url().transform(cleanProductUrl),
   threshold_price: z.number().positive().nullable().optional(),
   check_interval_minutes: z.number().int().min(5).optional(),
   css_selector: z.string().nullable().optional(),
@@ -328,7 +328,7 @@ router.get('/:id/overlap', (req: Request, res: Response) => {
 const CONDITION_VALUES = ['new', 'warehouse', 'refurb', 'open_box'] as const;
 
 const addUrlSchema = z.object({
-  url: z.string().url(),
+  url: z.string().url().transform(cleanProductUrl),
   condition: z.enum(CONDITION_VALUES).default('new'),
 });
 
