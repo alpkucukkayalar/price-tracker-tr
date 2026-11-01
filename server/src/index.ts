@@ -29,6 +29,7 @@ import { startScheduler, stopScheduler } from './scheduler/cron.js';
 import { startBackfillCron, stopBackfillCron } from './ai/backfill-cron.js';
 import { startDigestCron, stopDigestCron } from './digest/cron.js';
 import { startCampaignReportCron, stopCampaignReportCron } from './campaign/report.js';
+import { startAkakceBackfill, stopAkakceBackfill } from './campaign/akakce-auto.js';
 import { closeBrowser } from './scraper/browser.js';
 import { getUserCount, deleteExpiredRefreshTokens } from './db/user-queries.js';
 import { initSettingsCrypto } from './crypto/settings-crypto.js';
@@ -201,6 +202,7 @@ const server = app.listen(config.port, () => {
   startBackfillCron();
   startDigestCron();
   startCampaignReportCron();
+  startAkakceBackfill();
 });
 
 // Periodic cleanup of expired refresh tokens (every hour)
@@ -215,6 +217,7 @@ function shutdown() {
   stopBackfillCron();
   stopDigestCron();
   stopCampaignReportCron();
+  stopAkakceBackfill();
   clearInterval(cleanupInterval);
   server.close(() => {
     closeBrowser().then(() => {
