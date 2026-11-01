@@ -112,7 +112,9 @@ Step 'Otomatik başlatma ayarlanıyor'
 $serverDir = Join-Path $AppDir 'server'
 $logFile = Join-Path $DataDir 'log.txt'
 $nodeExe = (Get-Command node).Source
-$cmd = "Set-Location '$serverDir'; & '$nodeExe' --env-file='$EnvFile' dist/index.js *>> '$logFile'"
+# The server writes its own log file (LOG_FILE) instead of piping through
+# PowerShell, and the loop restarts it within 10 s if it ever exits.
+$cmd = "Set-Location '$serverDir'; `$env:LOG_FILE='$logFile'; while (`$true) { & '$nodeExe' --env-file='$EnvFile' dist/index.js; Start-Sleep -Seconds 10 }"
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command `"$cmd`""
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
