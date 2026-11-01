@@ -738,6 +738,27 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    version: 24,
+    description: 'trackers.image_url: product thumbnail for the dashboard card',
+    up: () => {
+      const db = getDb();
+      const cols = (db.pragma('table_info(trackers)') as { name: string }[]).map(c => c.name);
+      if (!cols.includes('image_url')) {
+        db.prepare('ALTER TABLE trackers ADD COLUMN image_url TEXT').run();
+      }
+    },
+  },
+  {
+    version: 25,
+    description: 'Dashboard layout: trackers.dash_group (0-2) + dash_order for drag-and-drop priority groups',
+    up: () => {
+      const db = getDb();
+      const cols = (db.pragma('table_info(trackers)') as { name: string }[]).map(c => c.name);
+      if (!cols.includes('dash_group')) db.prepare('ALTER TABLE trackers ADD COLUMN dash_group INTEGER NOT NULL DEFAULT 0').run();
+      if (!cols.includes('dash_order')) db.prepare('ALTER TABLE trackers ADD COLUMN dash_order INTEGER NOT NULL DEFAULT 0').run();
+    },
+  },
 ];
 
 export function runMigrations(): void {

@@ -643,3 +643,7 @@ export interface FindElsewhereResult {
 }
 export const findElsewhere = (trackerId: number, q?: string) =>
   request<FindElsewhereResult>(`/trackers/${trackerId}/find-elsewhere${q ? `?q=${encodeURIComponent(q)}` : ''}`)
+
+// Drag-and-drop dashboard layout (3 priority groups).
+export const saveDashboardLayout = (items: { id: number; group: number; order: number }[]) =>
+  request<{ updated: number }>('/trackers/layout', { method: 'PUT', body: JSON.stringify({ items }) })

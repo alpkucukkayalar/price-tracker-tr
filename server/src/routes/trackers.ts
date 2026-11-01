@@ -10,6 +10,7 @@ import {
   searchTrackersByName,
 } from '../db/queries.js';
 import { checkTracker, checkTrackerUrl } from '../scheduler/cron.js';
+import { saveDashboardLayout } from '../db/queries.js';
 import { getDailyMinHistoryForTracker, getRecentLowTiers, getTrackerIdByNormalizedUrl, getCampaignDailyHistory } from '../db/queries.js';
 import { analyzeCampaign } from '../campaign/analysis.js';
 import { getCampaign, istanbulToday } from '../campaign/config.js';
@@ -195,6 +196,23 @@ router.post('/', (req: Request, res: Response) => {
   if (process.env.AKAKCE_AUTO !== '0' && process.env.NODE_ENV !== 'test') {
     setTimeout(() => { void autoAddAkakce(tracker.id); }, 15_000).unref?.();
   }
+});
+
+// Drag-and-drop dashboard layout: [{ id, group (0-2), order }].
+const layoutSchema = z.object({
+  items: z.array(z.object({
+    id: z.number().int().positive(),
+    group: z.number().int().min(0).max(2),
+    order: z.number().int().min(0).max(100000),
+  })).max(2000),
+});
+router.put('/layout', (req: Request, res: Response) => {
+  const parsed = layoutSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.flatten() });
+    return;
+  }
+  res.json({ updated: saveDashboardLayout(req.user!.userId, parsed.data.items) });
 });
 
 router.get('/:id', (req: Request, res: Response) => {

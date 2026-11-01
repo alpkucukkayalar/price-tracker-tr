@@ -202,7 +202,8 @@ function App() {
           </div>
         )}
       </nav>
-      <main className="max-w-6xl mx-auto px-4 py-6 min-h-[calc(100vh-8rem)]">
+      {/* The dashboard uses the full width of wide monitors (more columns). */}
+      <main className={`${location.pathname === "/" ? "max-w-[2600px]" : "max-w-6xl"} mx-auto px-4 sm:px-6 py-6 min-h-[calc(100vh-8rem)]`}>
         <Suspense fallback={<RouteFallback />}>
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

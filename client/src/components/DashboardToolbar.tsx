@@ -1,11 +1,11 @@
 import { Search } from 'lucide-react'
 import { FILTER_LABELS, type DashboardFilter, type DashboardSortMode } from '../lib/dashboard-filter'
-import { t } from '../lib/i18n'
+import { t, tl } from '../lib/i18n'
 
 const CHIP_LABELS = FILTER_LABELS
 const CHIP_ORDER: DashboardFilter[] = ['all', 'active', 'below-target', 'errors', 'blocked', 'paused', 'purchased']
 const SORT_LABELS: Record<DashboardSortMode, string> = {
-  smart: t('Smart'), price: t('Price'), recent: t('Recently checked'), alpha: 'A–Z',
+  smart: t('Smart'), manual: tl('My layout (drag & drop)', 'Benim düzenim (sürükle-bırak)'), price: t('Price'), recent: t('Recently checked'), alpha: 'A–Z',
 }
 
 interface DashboardToolbarProps {
