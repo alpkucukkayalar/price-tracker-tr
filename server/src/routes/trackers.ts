@@ -24,6 +24,11 @@ import {
 } from '../stats/price-stats.js';
 import { cancelOpenIntentsForTracker } from '../db/purchase-intents.js';
 import { extractPrice } from '../scraper/extractor.js';
+import { fetchPageContent } from '../scraper/browser.js';
+import {
+  buildSearchUrl, parseSearchResults, retailersToSearch, searchQueryFromName,
+  type SearchCandidate, type SearchRetailer,
+} from '../scraper/product-search.js';
 import {
   affiliateTracker,
   affiliateTrackers,
@@ -339,6 +344,29 @@ router.get('/:id/urls', (req: Request, res: Response) => {
     return;
   }
   res.json(affiliateUrlOnObjects(getTrackerUrlsForTracker(tracker.id)));
+});
+
+// "Diğer sitelerde bul": search the other Turkish retailers for this
+// product and return candidates; the client adds the one the user picks
+// through POST /:id/urls. Sequential to keep the browser load modest.
+router.get('/:id/find-elsewhere', async (req: Request, res: Response) => {
+  const tracker = getTrackerById(Number(req.params.id), req.user!.userId);
+  if (!tracker) {
+    res.status(404).json({ error: 'Tracker not found' });
+    return;
+  }
+  const query = String(req.query.q ?? '').trim() || searchQueryFromName(tracker.name);
+  const existing = getTrackerUrlsForTracker(tracker.id).map(u => u.url);
+  const results: { retailer: SearchRetailer; candidates: SearchCandidate[]; error?: string }[] = [];
+  for (const retailer of retailersToSearch(existing)) {
+    try {
+      const { html } = await fetchPageContent(buildSearchUrl(retailer, query));
+      results.push({ retailer, candidates: parseSearchResults(retailer, html, query) });
+    } catch (err) {
+      results.push({ retailer, candidates: [], error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+  res.json({ query, results });
 });
 
 // Add a seller URL to a tracker

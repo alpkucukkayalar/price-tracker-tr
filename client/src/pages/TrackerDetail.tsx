@@ -40,6 +40,7 @@ import StatusBadge from '../components/StatusBadge'
 import { AIInsightsCard } from '../components/AIInsightsCard'
 import useTitle from '../useTitle'
 import { formatMoney } from '../lib/money'
+import FindElsewhere from '../components/FindElsewhere'
 import { t, uiLocale, ago } from '../lib/i18n'
 
 // PriceChart pulls in recharts (~180 KB). Lazy load it so the initial
@@ -629,6 +630,11 @@ export default function TrackerDetail() {
             {sellerError}
           </div>
         )}
+        <FindElsewhere
+          trackerId={trackerId}
+          trackerName={tracker.name}
+          onAdded={async updated => { setSellers(updated); await load() }}
+        />
       </div>
 
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">

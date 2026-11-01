@@ -628,3 +628,18 @@ export async function getPublicSavings(): Promise<SavingsSummary> {
   if (!r.ok) throw new Error(`getPublicSavings failed: ${r.status}`);
   return r.json();
 }
+
+// "Diğer sitelerde bul" — candidates for the same product on other retailers.
+export interface FindElsewhereCandidate {
+  retailer: 'trendyol' | 'amazon_tr' | 'n11'
+  title: string
+  url: string
+  price: number | null
+  score: number
+}
+export interface FindElsewhereResult {
+  query: string
+  results: { retailer: FindElsewhereCandidate['retailer']; candidates: FindElsewhereCandidate[]; error?: string }[]
+}
+export const findElsewhere = (trackerId: number, q?: string) =>
+  request<FindElsewhereResult>(`/trackers/${trackerId}/find-elsewhere${q ? `?q=${encodeURIComponent(q)}` : ''}`)

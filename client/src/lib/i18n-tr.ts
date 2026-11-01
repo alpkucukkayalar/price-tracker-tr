@@ -191,7 +191,7 @@ export const TR: Record<string, string> = {
   'Change listing condition': 'İlan durumunu değiştir',
   'Cannot delete the last seller': 'Son satıcı silinemez',
   'Remove seller': 'Satıcıyı kaldır',
-  'https://www.retailer.com/product/...': 'https://www.hepsiburada.com/...',
+  'https://www.retailer.com/product/...': 'https://www.trendyol.com/...',
   'Listing condition for the new seller URL': 'Yeni satıcı linkinin ilan durumu',
   'Adding & scraping...': 'Ekleniyor ve fiyat okunuyor...',
   'Add Seller': 'Satıcı Ekle',
