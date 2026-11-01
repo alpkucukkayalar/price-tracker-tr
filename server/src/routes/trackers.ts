@@ -25,6 +25,7 @@ import {
 import { cancelOpenIntentsForTracker } from '../db/purchase-intents.js';
 import { extractPrice } from '../scraper/extractor.js';
 import { fetchPageContent } from '../scraper/browser.js';
+import { autoAddAkakce } from '../campaign/akakce-auto.js';
 import {
   buildSearchUrl, parseSearchResults, retailersToSearch, searchQueryFromName,
   type SearchCandidate, type SearchRetailer,
@@ -189,6 +190,11 @@ router.post('/', (req: Request, res: Response) => {
   }
   const tracker = createTracker({ ...parsed.data, user_id: req.user!.userId });
   res.status(201).json(affiliateTracker(tracker));
+  // Look up the same product on Akakçe in the background (all stores' lowest
+  // price in one page). Delayed so the tracker's own first scrape goes first.
+  if (process.env.AKAKCE_AUTO !== '0' && process.env.NODE_ENV !== 'test') {
+    setTimeout(() => { void autoAddAkakce(tracker.id); }, 15_000).unref?.();
+  }
 });
 
 router.get('/:id', (req: Request, res: Response) => {
