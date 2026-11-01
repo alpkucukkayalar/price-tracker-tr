@@ -126,6 +126,28 @@ function normalizeTurkish(cleaned: string): string {
   return cleaned;
 }
 
+const TR_NUMBER_RE = /\d{1,3}(?:\.\d{3})+(?:,\d+)?|\d+(?:[.,]\d+)?/g;
+
+/**
+ * The price number inside a Turkish price text: the first number written
+ * right next to a TL/₺/TRY marker, else the first number. Percentages
+ * ("%10", "10%") are ignored.
+ */
+export function pickTurkishPriceToken(text: string): string | null {
+  const t = text
+    .replace(/&nbsp;|&#160;|\u00a0|\u202f/gi, ' ')
+    .replace(/%\s*\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?\s*%/g, ' ');
+  const tokens = [...t.matchAll(TR_NUMBER_RE)];
+  if (tokens.length === 0) return null;
+  for (const m of tokens) {
+    const end = (m.index ?? 0) + m[0].length;
+    const after = t.slice(end, end + 4);
+    const before = t.slice(Math.max(0, (m.index ?? 0) - 2), m.index);
+    if (/^\s?(?:TL|TRY|₺)/i.test(after) || /₺\s?$/.test(before)) return m[0];
+  }
+  return tokens[0][0];
+}
+
 /**
  * Parse a price string like "$1,234.56", "1234.56" or "1.299,99 TL" into a
  * number. Turkish format is used when the text has a ₺/TL/TRY marker or
@@ -134,14 +156,23 @@ function normalizeTurkish(cleaned: string): string {
 export function parsePrice(text: string, opts: ParsePriceOptions = {}): number | null {
   if (!text) return null;
   const turkish = opts.locale === 'tr' || hasTurkishLiraMarker(text);
+  if (turkish) {
+    // Pick ONE number token instead of gluing every digit in the text
+    // together: Amazon.com.tr price labels can carry a discount ("%10"),
+    // a duplicated price ("1.259,00TL1.259,00TL") or a unit price
+    // ("parça başına 55,74 TL"), which turned 1.259,00 into 101259.
+    const token = pickTurkishPriceToken(text);
+    if (!token) return null;
+    const price = parseFloat(normalizeTurkish(token));
+    if (isNaN(price) || price <= 0) return null;
+    return Math.round(price * 100) / 100;
+  }
   // Remove everything except digits, dots, and commas
   const cleaned = text.replace(/[^0-9.,]/g, '').replace(/^[.,]+|[.,]+$/g, '');
   if (!cleaned) return null;
 
   let normalized: string;
-  if (turkish) {
-    normalized = normalizeTurkish(cleaned);
-  } else if (cleaned.includes(',') && cleaned.includes('.')) {
+  if (cleaned.includes(',') && cleaned.includes('.')) {
     // Both present: whichever separator comes LAST is the decimal point.
     // "1,234.56" (US) → 1234.56; "1.234,56" (EU/TR) → 1234.56.
     normalized =

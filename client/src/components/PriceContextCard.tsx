@@ -3,6 +3,7 @@ import { TrendingDown } from 'lucide-react'
 import { getTrackerPriceStats, updateTracker } from '../api'
 import type { Tracker, TrackerPriceStats } from '../types'
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 interface Props {
   tracker: Tracker
@@ -11,9 +12,9 @@ interface Props {
 }
 
 const MODE_LABELS: Record<'all' | 'record_only' | 'off', string> = {
-  all: 'All record lows (30d / 90d / all-time)',
-  record_only: 'All-time lows only',
-  off: 'Off',
+  all: t('All record lows (30d / 90d / all-time)'),
+  record_only: t('All-time lows only'),
+  off: t('Off'),
 }
 
 function money(v: number | null): string {
@@ -69,17 +70,17 @@ export function PriceContextCard({ tracker, onTrackerUpdated }: Props) {
     <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">
       <div className="flex items-center gap-2 mb-3">
         <TrendingDown className="w-4 h-4 text-primary" />
-        <h2 className="font-semibold">Price Context</h2>
-        <span className="text-xs text-muted ml-auto">{stats.span_days} days tracked</span>
+        <h2 className="font-semibold">{t('Price Context')}</h2>
+        <span className="text-xs text-muted ml-auto">{stats.span_days} {t('days tracked')}</span>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
-        {([['30 days', windows.w30], ['90 days', windows.w90], ['All-time', windows.all]] as const).map(
+        {([[t('30 days'), windows.w30], [t('90 days'), windows.w90], [t('All-time'), windows.all]] as const).map(
           ([label, w]) => (
             <div key={label} className="bg-background rounded-lg p-3">
               <div className="text-xs text-muted mb-1">{label}</div>
               <div className="font-semibold">{money(w.min)}</div>
-              <div className="text-xs text-muted">median {money(w.median)}</div>
+              <div className="text-xs text-muted">{t('median')} {money(w.median)}</div>
             </div>
           ),
         )}
@@ -87,42 +88,41 @@ export function PriceContextCard({ tracker, onTrackerUpdated }: Props) {
 
       {stats.current_percentile_90d !== null && (
         <p className="text-sm text-muted mb-3">
-          Today&apos;s price is cheaper than {100 - stats.current_percentile_90d}% of the last 90 days.
+          {t('Today\'s price is cheaper than')} {100 - stats.current_percentile_90d}{t('% of the last 90 days.')}
         </p>
       )}
 
       {stats.threshold_staleness === 'stale_low' && (
         <p className="text-sm text-amber-600 dark:text-amber-400 mb-3">
-          Your target of {money(tracker.threshold_price)} is below anything seen in{' '}
-          {stats.span_days} days of tracking — it may never fire.
+          {t('Your target of')} {money(tracker.threshold_price)} {t('is below anything seen in')}{' '}
+          {stats.span_days} {t('days of tracking — it may never fire.')}
         </p>
       )}
       {stats.threshold_staleness === 'stale_high' && (
         <p className="text-sm text-amber-600 dark:text-amber-400 mb-3">
-          Your target of {money(tracker.threshold_price)} is at or above the typical price — it
-          fires on ordinary days, not deals.
+          {t('Your target of')} {money(tracker.threshold_price)} {t('is at or above the typical price — it fires on ordinary days, not deals.')}
         </p>
       )}
 
       {suggestionApplies && (
         <div className="flex items-center gap-3 mb-3">
           <span className="text-sm">
-            Suggested target: <span className="font-semibold">{money(stats.suggested_threshold)}</span>
-            <span className="text-xs text-muted ml-1">(10th percentile of recent daily lows)</span>
+            {t('Suggested target:')} <span className="font-semibold">{money(stats.suggested_threshold)}</span>
+            <span className="text-xs text-muted ml-1">{t('(10th percentile of recent daily lows)')}</span>
           </span>
           <button
             onClick={applySuggestion}
             disabled={busy}
             className="text-sm px-3 py-1 rounded-lg bg-primary text-white disabled:opacity-50"
           >
-            Apply
+            {t('Apply')}
           </button>
         </div>
       )}
 
       <div className="flex items-center gap-2 text-sm">
         <label htmlFor="low-alert-mode" className="text-muted">
-          Record-low alerts
+          {t('Record-low alerts')}
         </label>
         <select
           id="low-alert-mode"

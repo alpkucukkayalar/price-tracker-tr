@@ -1,5 +1,6 @@
 import type { Tracker } from '../types'
 import { isErrored } from './dashboard-sort'
+import { t } from './i18n'
 
 export type DashboardFilter = 'all' | 'active' | 'below-target' | 'errors' | 'blocked' | 'paused' | 'purchased'
 export type DashboardSortMode = 'smart' | 'price' | 'recent' | 'alpha'
@@ -10,8 +11,8 @@ const SORTS: DashboardSortMode[] = ['smart', 'price', 'recent', 'alpha']
 // Shared human-readable labels — used by both the toolbar chips and the
 // Dashboard empty state, so a filter name only has one spelling in the UI.
 export const FILTER_LABELS: Record<DashboardFilter, string> = {
-  all: 'All', active: 'Active', 'below-target': 'Below target',
-  errors: 'Errors', blocked: 'Blocked', paused: 'Paused', purchased: 'Purchased',
+  all: t('All'), active: t('Active'), 'below-target': t('Below target'),
+  errors: t('Errors'), blocked: t('Blocked'), paused: t('Paused'), purchased: t('Purchased'),
 }
 
 export function parseFilter(raw: string | null): DashboardFilter {

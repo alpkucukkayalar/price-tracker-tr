@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import confetti from 'canvas-confetti'
 import type { SavingsTier } from '../lib/savings-tiers'
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 interface Props {
   tier: SavingsTier
@@ -79,16 +80,16 @@ export default function SavingsCelebration({ tier, saying, savingsAmount, onDism
           <div className={`text-xs uppercase tracking-wider font-bold mb-2 ${
             tier >= 6 ? 'text-warning' : 'text-primary'
           }`}>
-            Tier {tier}
+            {t('Tier')} {tier}
           </div>
           <div className={`font-bold text-text ${tier >= 6 ? 'text-3xl sm:text-4xl' : 'text-xl sm:text-2xl'}`}>
             {saying}
           </div>
           <div className={`mt-3 ${tier >= 6 ? 'text-2xl sm:text-3xl text-success font-extrabold' : 'text-lg text-success font-semibold'}`}>
-            {formatMoney(savingsAmount)} in potential savings
+            {formatMoney(savingsAmount)} {t('in potential savings')}
           </div>
           <div className="text-[11px] text-text-muted mt-4">
-            Click anywhere to dismiss
+            {t('Click anywhere to dismiss')}
           </div>
         </div>
       </div>

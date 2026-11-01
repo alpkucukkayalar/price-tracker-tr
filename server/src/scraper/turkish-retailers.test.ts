@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parsePrice } from './extractor.js';
 import {
+  extractAmazonTr,
   detectTurkishRetailer,
   isTurkishHost,
   extractTrendyol,
@@ -141,5 +142,41 @@ describe('Amazon.com.tr', () => {
   it('extracts the struck-through list price', () => {
     expect(extractAmazonTrListPrice(html)).toBe(1799);
     expect(extractTurkishListPrice(html, 'amazon_tr', 1249)).toBe(1799);
+  });
+});
+
+describe('Amazon.com.tr noisy price text (real-page regressions 2026-11-01)', () => {
+  it('ignores a discount percentage glued before the price', () => {
+    expect(parsePrice('%10 1.259,00TL')).toBe(1259);
+  });
+  it('reads a duplicated price once', () => {
+    expect(parsePrice('1.259,00TL1.259,00TL')).toBe(1259);
+  });
+  it('prefers the TL-marked price over a unit price', () => {
+    expect(parsePrice('278,69TL278,69TL parça başına 55,74 TL(55,74TL55,74TL / parça)')).toBe(278.69);
+  });
+  it('keeps plain Turkish and machine formats working', () => {
+    expect(parsePrice('12.499 TL')).toBe(12499);
+    expect(parsePrice('₺ 1.299,99')).toBe(1299.99);
+    expect(parsePrice('1299.99', { locale: 'tr' })).toBe(1299.99);
+    expect(parsePrice('Fiyat: 899,90 TL', { locale: 'tr' })).toBe(899.9);
+  });
+});
+
+describe('extractAmazonTr', () => {
+  const page = (inner: string) =>
+    `<html><body><div id="apex_desktop">Gülümseten Kasım fırsatı NO_OF_HOURS saat %10</div>` +
+    `<div id="corePriceDisplay_desktop_feature_div"><style>.savingPriceOverride { color: var(--deal-savings-color,#CC0C39)!important; }</style>` +
+    `<span id="apex-pricetopay-accessibility-label">%10 indirim 1.259,00 TL</span></div>` +
+    `<div id="corePrice_feature_div">${inner}</div></body></html>`;
+  it('reads the first a-offscreen in the core price box', () => {
+    const html = page(
+      `<span class="a-price"><span class="a-offscreen">278,69TL</span><span aria-hidden="true"><span class="a-price-whole">278<span class="a-price-decimal">,</span></span><span class="a-price-fraction">69</span>TL</span></span>` +
+      ` parça başına <span class="a-price"><span class="a-offscreen">55,74TL</span></span> / parça`,
+    );
+    expect(extractAmazonTr(html)).toEqual({ price: 278.69, listPrice: null, source: 'amazon-tr-dom' });
+  });
+  it('returns null without a core price box', () => {
+    expect(extractAmazonTr('<html><body><span class="a-offscreen">99,00TL</span></body></html>')).toBeNull();
   });
 });

@@ -1,13 +1,14 @@
 import type { Tracker } from '../types';
 import { VerdictPill } from './VerdictPill';
+import { t, ago } from '../lib/i18n'
 
 function formatRelative(ms: number | null | undefined): string {
   if (!ms) return '';
   const diffMin = Math.round((Date.now() - ms) / 60000);
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 60) return ago(diffMin, 'm');
   const diffHr = Math.round(diffMin / 60);
-  if (diffHr < 48) return `${diffHr}h ago`;
-  return `${Math.round(diffHr / 24)}d ago`;
+  if (diffHr < 48) return ago(diffHr, 'h');
+  return ago(Math.round(diffHr / 24), 'd');
 }
 
 interface Props {
@@ -30,7 +31,7 @@ export function AIInsightsCard({ tracker }: Props) {
           />
           {tracker.ai_verdict_updated_at && (
             <span className="text-xs text-text-muted">
-              Updated {formatRelative(tracker.ai_verdict_updated_at)}
+              {t('Updated')} {formatRelative(tracker.ai_verdict_updated_at)}
             </span>
           )}
         </div>

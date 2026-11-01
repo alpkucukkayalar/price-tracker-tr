@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import useNotificationCount from '../useNotificationCount'
+import { t } from '../lib/i18n'
 
 export default function NotificationBell() {
   const count = useNotificationCount()
@@ -8,7 +9,7 @@ export default function NotificationBell() {
   return (
     <Link
       to="/notifications"
-      title="Notifications"
+      title={t('Notifications')}
       className="relative flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-hover transition-colors"
     >
       <Bell className="w-5 h-5" />

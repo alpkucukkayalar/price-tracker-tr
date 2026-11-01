@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { Tracker } from '../types';
 import { addProjectTracker } from '../api';
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 interface Props {
   projectId: number;
@@ -40,7 +41,7 @@ export function AddTrackerModal({ projectId, excludeIds, onClose, onAdded }: Pro
     try {
       const ceiling = ceilingInput.trim() === '' ? null : Number(ceilingInput);
       if (ceiling !== null && (!Number.isFinite(ceiling) || ceiling <= 0)) {
-        setError('Ceiling must be a positive number');
+        setError(t('Ceiling must be a positive number'));
         return;
       }
       await addProjectTracker(projectId, { tracker_id: selectedId, per_item_ceiling: ceiling });
@@ -54,17 +55,17 @@ export function AddTrackerModal({ projectId, excludeIds, onClose, onAdded }: Pro
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-surface border border-border rounded-lg p-4 w-full max-w-md max-h-[80vh] overflow-y-auto">
-        <h3 className="font-bold mb-3">Add tracker to project</h3>
+        <h3 className="font-bold mb-3">{t('Add tracker to project')}</h3>
         <input
           autoFocus
-          placeholder="Search trackers..."
+          placeholder={t('Search trackers...')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full bg-bg border border-border rounded px-3 py-2 mb-3"
         />
         <div className="max-h-64 overflow-y-auto border border-border rounded mb-3">
           {filtered.length === 0 ? (
-            <div className="p-3 text-text-muted text-sm">No trackers match.</div>
+            <div className="p-3 text-text-muted text-sm">{t('No trackers match.')}</div>
           ) : (
             filtered.map(t => (
               <button
@@ -82,20 +83,20 @@ export function AddTrackerModal({ projectId, excludeIds, onClose, onAdded }: Pro
         </div>
         <input
           type="number" step="0.01" min="0.01"
-          placeholder="Per-item ceiling (optional)"
+          placeholder={t('Per-item ceiling (optional)')}
           value={ceilingInput}
           onChange={e => setCeilingInput(e.target.value)}
           className="w-full bg-bg border border-border rounded px-3 py-2 mb-3"
         />
         {error && <div className="text-error text-sm mb-2">{error}</div>}
         <div className="flex gap-2 justify-end">
-          <button onClick={onClose} className="px-3 py-1.5 rounded border border-border">Cancel</button>
+          <button onClick={onClose} className="px-3 py-1.5 rounded border border-border">{t('Cancel')}</button>
           <button
             onClick={handleAdd}
             disabled={selectedId === null}
             className="px-3 py-1.5 rounded bg-primary text-white font-medium disabled:opacity-50"
           >
-            Add
+            {t('Add')}
           </button>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { DollarSign, CheckCircle, AlertCircle } from 'lucide-react'
 import { usePublicConfig } from '../lib/use-public-config'
+import { t } from '../lib/i18n'
 
 /**
  * Read-only Settings card that surfaces the Amazon Associates wiring
@@ -23,9 +24,9 @@ export function AffiliateStatusCard() {
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mt-4">
         <div className="flex items-center gap-2 mb-2">
           <DollarSign className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold">Amazon Associates</h2>
+          <h2 className="text-lg font-semibold">{t('Amazon Associates')}</h2>
         </div>
-        <p className="text-text-muted text-sm">Loading...</p>
+        <p className="text-text-muted text-sm">{t('Loading...')}</p>
       </div>
     )
   }
@@ -34,14 +35,14 @@ export function AffiliateStatusCard() {
     <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mt-4">
       <div className="flex items-center gap-2 mb-2">
         <DollarSign className="w-5 h-5 text-primary" />
-        <h2 className="text-lg font-semibold">Amazon Associates</h2>
+        <h2 className="text-lg font-semibold">{t('Amazon Associates')}</h2>
       </div>
 
       {cfg.amazon_affiliate_enabled ? (
         <>
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle className="w-4 h-4 text-success" />
-            <span className="text-sm font-medium">Configured</span>
+            <span className="text-sm font-medium">{t('Configured')}</span>
             <code className="text-xs bg-bg-subtle px-2 py-0.5 rounded border border-border font-mono">
               {cfg.amazon_affiliate_tag}
             </code>
@@ -56,7 +57,7 @@ export function AffiliateStatusCard() {
         <>
           <div className="flex items-center gap-2 mb-3">
             <AlertCircle className="w-4 h-4 text-warning" />
-            <span className="text-sm font-medium">Not configured</span>
+            <span className="text-sm font-medium">{t('Not configured')}</span>
           </div>
           <p className="text-text-muted text-sm">
             Set <code className="text-xs bg-bg-subtle px-1 py-0.5 rounded border border-border font-mono">AMAZON_AFFILIATE_TAG</code> in

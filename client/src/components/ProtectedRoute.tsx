@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { t } from '../lib/i18n'
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, needsSetup } = useAuth();
@@ -10,7 +11,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const location = useLocation();
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-text-muted">Loading...</div>;
+    return <div className="flex items-center justify-center h-64 text-text-muted">{t('Loading...')}</div>;
   }
 
   if (needsSetup) {

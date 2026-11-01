@@ -1,11 +1,12 @@
+import { L } from '../lib/i18n.js';
 import type { Tracker, TrackerUrlCondition } from '../db/queries.js';
 import type { Confidence } from '../ai/confidence.js';
 import { logger } from '../logger.js';
 import { conditionLabel, formatPriceWithCondition } from './condition-label.js';
 
 function discordTitlePrefix(level: Confidence['level']): string {
-  if (level === 'HIGH') return '🟢 STRONG BUY — ';
-  if (level === 'MEDIUM') return '🟡 GOOD DEAL — ';
+  if (level === 'HIGH') return L('🟢 STRONG BUY — ', '🟢 KESİN AL — ');
+  if (level === 'MEDIUM') return L('🟡 GOOD DEAL — ', '🟡 İYİ FIRSAT — ');
   return '';
 }
 
@@ -32,17 +33,17 @@ export async function sendDiscordPriceAlert(
   const titlePrefix = confidence ? discordTitlePrefix(confidence.level) : '';
 
   const fields: Record<string, unknown>[] = [
-    { name: 'Current Price', value: formatPriceWithCondition(currentPrice, condition), inline: true },
+    { name: L('Current Price', 'Güncel Fiyat'), value: formatPriceWithCondition(currentPrice, condition), inline: true },
   ];
   if (tracker.threshold_price) {
     fields.push(
-      { name: 'Threshold', value: `${formatMoney(tracker.threshold_price)}`, inline: true },
-      { name: 'Savings', value: `${formatMoney((tracker.threshold_price - currentPrice))}`, inline: true },
+      { name: L('Threshold', 'Hedef'), value: `${formatMoney(tracker.threshold_price)}`, inline: true },
+      { name: L('Savings', 'Tasarruf'), value: `${formatMoney((tracker.threshold_price - currentPrice))}`, inline: true },
     );
   }
   if (low) {
     fields.push({
-      name: low.tier === 'back_in_stock' ? 'Stock' : 'Record',
+      name: low.tier === 'back_in_stock' ? L('Stock', 'Stok') : L('Record', 'Rekor'),
       value: low.context,
       inline: false,
     });
@@ -50,13 +51,13 @@ export async function sendDiscordPriceAlert(
 
   const embed: Record<string, unknown> = {
     title: low && !tracker.threshold_price
-      ? `${titlePrefix}${low.tier === 'back_in_stock' ? 'Back in Stock' : 'Record Low'}: ${tracker.name}`
-      : `${titlePrefix}Price Drop Alert: ${tracker.name}`,
+      ? `${titlePrefix}${low.tier === 'back_in_stock' ? L('Back in Stock', 'Tekrar Stokta') : L('Record Low', 'En Düşük Fiyat')}: ${tracker.name}`
+      : `${titlePrefix}${L('Price Drop Alert: ', 'Fiyat Düştü: ')}${tracker.name}`,
     color: 0x00c853,
     fields,
     url: tracker.url,
     timestamp: new Date().toISOString(),
-    footer: { text: 'Price Tracker' },
+    footer: { text: L('Price Tracker', 'Fiyat Takip') },
   };
 
   // Build description: aiCommentary (when present) above reasons line.
@@ -103,7 +104,7 @@ export async function sendDiscordDigest(
     description: description.length > 4000 ? description.slice(0, 4000) + '\u2026' : description,
     color: 0x2563eb,
     timestamp: new Date().toISOString(),
-    footer: { text: 'Price Tracker' },
+    footer: { text: L('Price Tracker', 'Fiyat Takip') },
   };
   try {
     const response = await fetch(webhookUrl, {
@@ -129,15 +130,15 @@ export async function sendDiscordErrorAlert(
   webhookUrl: string,
 ): Promise<boolean> {
   const embed = {
-    title: `Tracker Error: ${tracker.name}`,
+    title: `${L('Tracker Error: ', 'Takip Hatası: ')}${tracker.name}`,
     color: 0xff1744,
-    description: `Failed to check price after ${tracker.consecutive_failures} consecutive attempts.`,
+    description: `${L(`Failed to check price after ${tracker.consecutive_failures} consecutive attempts.`, `Fiyat art arda ${tracker.consecutive_failures} kez okunamadı.`)}`,
     fields: [
-      { name: 'Error', value: error.slice(0, 1024) },
+      { name: L('Error', 'Hata'), value: error.slice(0, 1024) },
       { name: 'URL', value: tracker.url },
     ],
     timestamp: new Date().toISOString(),
-    footer: { text: 'Price Tracker' },
+    footer: { text: L('Price Tracker', 'Fiyat Takip') },
   };
 
   try {
@@ -174,14 +175,14 @@ export async function sendDiscordBasketAlert(
     : baseDescription;
 
   const embed: Record<string, unknown> = {
-    title: `Bundle Ready: ${project.name}`,
+    title: `${L('Bundle Ready: ', 'Sepet Hazır: ')}${project.name}`,
     color: 0x00c853,
     description,
     fields: [
-      { name: 'Total', value: `${formatMoney(basket.total)}`, inline: true },
-      { name: 'Target', value: `${formatMoney(project.target_total)}`, inline: true },
-      { name: 'Savings', value: savings, inline: true },
-      { name: 'Items', value: String(basket.item_count), inline: true },
+      { name: L('Total', 'Toplam'), value: `${formatMoney(basket.total)}`, inline: true },
+      { name: L('Target', 'Hedef'), value: `${formatMoney(project.target_total)}`, inline: true },
+      { name: L('Savings', 'Tasarruf'), value: savings, inline: true },
+      { name: L('Items', 'Ürünler'), value: String(basket.item_count), inline: true },
     ],
   };
 
@@ -206,10 +207,10 @@ export async function sendDiscordPurchaseArm(
   webhookUrl: string,
 ): Promise<boolean> {
   const embed = {
-    title: `🛒 Ready to buy: ${trackerName}`,
+    title: `🛒 ${L('Ready to buy: ', 'Almaya hazır: ')}${trackerName}`,
     color: 0xff9900,
     description: `Hit **${formatMoney(currentPrice)}** (your limit ${formatMoney(threshold)}).`,
-    fields: [{ name: 'Approve', value: `[Review & buy →](${buyUrl})` }],
+    fields: [{ name: L('Approve', 'Onayla'), value: `[Review & buy →](${buyUrl})` }],
   };
   try {
     const resp = await fetch(webhookUrl, {
@@ -231,8 +232,8 @@ export async function testDiscordWebhook(webhookUrl: string): Promise<{ ok: bool
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         embeds: [{
-          title: 'Price Tracker - Test Notification',
-          description: 'Webhook is working correctly!',
+          title: L('Price Tracker - Test Notification', 'Fiyat Takip - Test Bildirimi'),
+          description: L('Webhook is working correctly!', 'Webhook düzgün çalışıyor!'),
           color: 0x2196f3,
           timestamp: new Date().toISOString(),
         }],

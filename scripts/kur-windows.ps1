@@ -76,7 +76,7 @@ Copy-Item (Join-Path $src.FullName '*') $AppDir -Recurse -Force
 Step 'Bağımlılıklar ve derleme (5-10 dakika sürebilir)'
 Push-Location (Join-Path $AppDir 'server')
 npm ci --no-audit --no-fund; if ($LASTEXITCODE) { throw 'npm ci (server) başarısız' }
-npx --yes playwright install chromium; if ($LASTEXITCODE) { throw 'Chromium indirilemedi' }
+npx playwright install chromium chromium-headless-shell; if ($LASTEXITCODE) { throw 'Chromium indirilemedi' }
 npm run build; if ($LASTEXITCODE) { throw 'Server derlenemedi' }
 Pop-Location
 Push-Location (Join-Path $AppDir 'client')
@@ -112,7 +112,9 @@ Step 'Otomatik başlatma ayarlanıyor'
 $serverDir = Join-Path $AppDir 'server'
 $logFile = Join-Path $DataDir 'log.txt'
 $nodeExe = (Get-Command node).Source
-$cmd = "Set-Location '$serverDir'; & '$nodeExe' --env-file='$EnvFile' dist/index.js *>> '$logFile'"
+# The server writes its own log file (LOG_FILE) instead of piping through
+# PowerShell, and the loop restarts it within 10 s if it ever exits.
+$cmd = "Set-Location '$serverDir'; `$env:LOG_FILE='$logFile'; while (`$true) { & '$nodeExe' --env-file='$EnvFile' dist/index.js; Start-Sleep -Seconds 10 }"
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -Command `"$cmd`""
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `

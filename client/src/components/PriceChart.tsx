@@ -2,6 +2,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceL
 import type { PriceRecord } from '../types'
 import { buildChartData } from '../lib/chart-data'
 import { formatMoney, formatMoneyAxis } from '../lib/money'
+import { t, uiLocale } from '../lib/i18n'
 
 interface Props {
   data: PriceRecord[]
@@ -10,19 +11,19 @@ interface Props {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr.includes('Z') ? dateStr : dateStr + 'Z')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return d.toLocaleDateString(uiLocale(), { month: 'short', day: 'numeric' })
 }
 
 function formatTime(dateStr: string): string {
   const d = new Date(dateStr.includes('Z') ? dateStr : dateStr + 'Z')
-  return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+  return d.toLocaleString(uiLocale(), { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
 export default function PriceChart({ data, threshold }: Props) {
   if (data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-text-muted text-sm">
-        No price data yet. Trigger a check to start tracking.
+        {t('No price data yet. Trigger a check to start tracking.')}
       </div>
     )
   }
@@ -89,7 +90,7 @@ export default function PriceChart({ data, threshold }: Props) {
             // `name` is the seller key from dataKey; translate it back to
             // the friendly hostname label for the tooltip.
             const seller = sellers.find(s => s.key === name)
-            const label = seller?.label || 'Price'
+            const label = seller?.label || t('Price')
             return [`${formatMoney(Number(value))}`, label]
           }}
           labelFormatter={(_label: unknown, payload: unknown) => {

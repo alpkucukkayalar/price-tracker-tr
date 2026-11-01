@@ -3,6 +3,7 @@ import type { BasketMember } from '../types';
 import { VerdictPill } from './VerdictPill';
 import { updateProjectTracker, removeProjectTracker } from '../api';
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 interface Props {
   projectId: number;
@@ -20,7 +21,7 @@ export function BasketMembersTable({ projectId, members, onChange }: Props) {
     try {
       const value = ceilingInput.trim() === '' ? null : Number(ceilingInput);
       if (value !== null && (!Number.isFinite(value) || value <= 0)) {
-        setError('Ceiling must be a positive number');
+        setError(t('Ceiling must be a positive number'));
         return;
       }
       await updateProjectTracker(projectId, trackerId, { per_item_ceiling: value });
@@ -32,7 +33,7 @@ export function BasketMembersTable({ projectId, members, onChange }: Props) {
   }
 
   async function handleRemove(trackerId: number) {
-    if (!confirm('Remove this tracker from the project?')) return;
+    if (!confirm(t('Remove this tracker from the project?'))) return;
     try {
       await removeProjectTracker(projectId, trackerId);
       onChange();
@@ -42,7 +43,7 @@ export function BasketMembersTable({ projectId, members, onChange }: Props) {
   }
 
   if (members.length === 0) {
-    return <div className="text-text-muted text-sm py-4">No items yet. Click "Add Tracker" to start.</div>;
+    return <div className="text-text-muted text-sm py-4">{t('No items yet. Click "Add Tracker" to start.')}</div>;
   }
 
   return (
@@ -71,7 +72,7 @@ export function BasketMembersTable({ projectId, members, onChange }: Props) {
                 onBlur={() => saveCeiling(m.tracker_id)}
                 onKeyDown={e => { if (e.key === 'Enter') saveCeiling(m.tracker_id); }}
                 className="w-24 bg-bg border border-border rounded px-2 py-1 text-sm"
-                placeholder="ceiling"
+                placeholder={t('ceiling')}
               />
             ) : (
               <button
@@ -87,7 +88,7 @@ export function BasketMembersTable({ projectId, members, onChange }: Props) {
             <button
               onClick={() => handleRemove(m.tracker_id)}
               className="text-text-muted hover:text-error text-sm"
-              title="Remove from project"
+              title={t('Remove from project')}
             >
               ✕
             </button>

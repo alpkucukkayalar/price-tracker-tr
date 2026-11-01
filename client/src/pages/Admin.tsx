@@ -6,9 +6,10 @@ import {
 } from '../api';
 import type { User, InviteCode } from '../types';
 import useTitle from '../useTitle';
+import { t, uiLocale } from '../lib/i18n'
 
 export default function Admin() {
-  useTitle('Admin');
+  useTitle(t('Admin'));
   const [tab, setTab] = useState<'users' | 'invites'>('users');
   const [users, setUsers] = useState<User[]>([]);
   const [invites, setInvites] = useState<InviteCode[]>([]);
@@ -61,7 +62,7 @@ export default function Admin() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-text-muted">Loading...</div>;
+    return <div className="flex items-center justify-center h-64 text-text-muted">{t('Loading...')}</div>;
   }
 
   const tabClass = (t: string) =>
@@ -71,14 +72,14 @@ export default function Admin() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Admin</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('Admin')}</h1>
 
       <div className="flex gap-2 mb-6">
         <button onClick={() => setTab('users')} className={tabClass('users')}>
-          <span className="flex items-center gap-2"><Users className="w-4 h-4" /> Users</span>
+          <span className="flex items-center gap-2"><Users className="w-4 h-4" /> {t('Users')}</span>
         </button>
         <button onClick={() => setTab('invites')} className={tabClass('invites')}>
-          <span className="flex items-center gap-2"><Mail className="w-4 h-4" /> Invites</span>
+          <span className="flex items-center gap-2"><Mail className="w-4 h-4" /> {t('Invites')}</span>
         </button>
       </div>
 
@@ -87,12 +88,12 @@ export default function Admin() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-text-muted text-left">
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Role</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Trackers</th>
-                <th className="px-4 py-3 font-medium">Actions</th>
+                <th className="px-4 py-3 font-medium">{t('Name')}</th>
+                <th className="px-4 py-3 font-medium">{t('Email')}</th>
+                <th className="px-4 py-3 font-medium">{t('Role')}</th>
+                <th className="px-4 py-3 font-medium">{t('Status')}</th>
+                <th className="px-4 py-3 font-medium text-right">{t('Trackers')}</th>
+                <th className="px-4 py-3 font-medium">{t('Actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -111,7 +112,7 @@ export default function Admin() {
                     <span className={`text-xs font-medium px-2 py-1 rounded ${
                       user.is_active ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'
                     }`}>
-                      {user.is_active ? 'Active' : 'Inactive'}
+                      {user.is_active ? t('Active') : t('Inactive')}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right text-text font-medium tabular-nums">
@@ -120,17 +121,17 @@ export default function Admin() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <button onClick={() => handleToggleRole(user)}
-                        title={user.role === 'admin' ? 'Demote to user' : 'Promote to admin'}
+                        title={user.role === 'admin' ? t('Demote to user') : t('Promote to admin')}
                         className="p-1.5 rounded hover:bg-surface-hover text-text-muted hover:text-text transition-colors">
                         {user.role === 'admin' ? <ShieldOff className="w-4 h-4" /> : <Shield className="w-4 h-4" />}
                       </button>
                       <button onClick={() => handleToggleActive(user)}
-                        title={user.is_active ? 'Deactivate' : 'Activate'}
+                        title={user.is_active ? t('Deactivate') : t('Activate')}
                         className="p-1.5 rounded hover:bg-surface-hover text-text-muted hover:text-text transition-colors">
                         {user.is_active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                       </button>
                       <button onClick={() => handleDeleteUser(user)}
-                        title="Delete user"
+                        title={t('Delete user')}
                         className="p-1.5 rounded hover:bg-danger/20 text-text-muted hover:text-danger transition-colors">
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -148,17 +149,17 @@ export default function Admin() {
           <button onClick={handleCreateInvite}
             className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors mb-4">
             <Mail className="w-4 h-4" />
-            Generate Invite
+            {t('Generate Invite')}
           </button>
 
           <div className="bg-surface border border-border rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-text-muted text-left">
-                  <th className="px-4 py-3 font-medium">Code</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Created</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
+                  <th className="px-4 py-3 font-medium">{t('Code')}</th>
+                  <th className="px-4 py-3 font-medium">{t('Status')}</th>
+                  <th className="px-4 py-3 font-medium">{t('Created')}</th>
+                  <th className="px-4 py-3 font-medium">{t('Actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -169,23 +170,23 @@ export default function Admin() {
                       <span className={`text-xs font-medium px-2 py-1 rounded ${
                         invite.used_by ? 'bg-surface-hover text-text-muted' : 'bg-success/20 text-success'
                       }`}>
-                        {invite.used_by ? 'Used' : 'Available'}
+                        {invite.used_by ? t('Used') : t('Available')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-text-muted">
-                      {new Date(invite.created_at + 'Z').toLocaleDateString()}
+                      {new Date(invite.created_at + 'Z').toLocaleDateString(uiLocale())}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         {!invite.used_by && (
                           <>
                             <button onClick={() => handleCopyLink(invite.code, invite.id)}
-                              title="Copy invite link"
+                              title={t('Copy invite link')}
                               className="p-1.5 rounded hover:bg-surface-hover text-text-muted hover:text-text transition-colors">
                               {copied === invite.id ? <CheckCircle className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
                             </button>
                             <button onClick={() => handleDeleteInvite(invite.id)}
-                              title="Revoke invite"
+                              title={t('Revoke invite')}
                               className="p-1.5 rounded hover:bg-danger/20 text-text-muted hover:text-danger transition-colors">
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -198,7 +199,7 @@ export default function Admin() {
                 {invites.length === 0 && (
                   <tr>
                     <td colSpan={4} className="px-4 py-8 text-center text-text-muted">
-                      No invite codes yet. Generate one to get started.
+                      {t('No invite codes yet. Generate one to get started.')}
                     </td>
                   </tr>
                 )}

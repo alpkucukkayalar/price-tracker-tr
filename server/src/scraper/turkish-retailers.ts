@@ -233,8 +233,28 @@ export function extractTurkishRetailerPrice(html: string, retailer: TurkishRetai
     case 'n11':
       return extractN11(html);
     case 'amazon_tr':
-      return null;
+      return extractAmazonTr(html);
   }
+}
+
+/**
+ * Amazon.com.tr buy-box price: the first `.a-offscreen` span inside the
+ * core price container. Checked on real pages (2026-11-01): it is the clean
+ * "1.259,00TL" even where the container's other text repeats the price,
+ * adds a "parça başına" unit price or a deal badge.
+ */
+export function extractAmazonTr(html: string): TurkishPriceResult | null {
+  for (const id of ['corePrice_feature_div', 'corePriceDisplay_desktop_feature_div']) {
+    const open = new RegExp(`<div[^>]*id=["']${id}["'][^>]*>`, 'i').exec(html);
+    if (!open) continue;
+    const scope = html.slice(open.index, open.index + 8000);
+    const m = /<span[^>]*class=["']a-offscreen["'][^>]*>([^<]+)<\/span>/i.exec(scope);
+    const price = m ? trPrice(m[1]) : null;
+    if (price !== null) {
+      return { price, listPrice: sanitizeList(price, extractAmazonTrListPrice(html)), source: 'amazon-tr-dom' };
+    }
+  }
+  return null;
 }
 
 /** Claimed "original" price for any Turkish retailer, used after a generic-pipeline hit. */

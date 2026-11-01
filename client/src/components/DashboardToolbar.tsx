@@ -1,10 +1,11 @@
 import { Search } from 'lucide-react'
 import { FILTER_LABELS, type DashboardFilter, type DashboardSortMode } from '../lib/dashboard-filter'
+import { t } from '../lib/i18n'
 
 const CHIP_LABELS = FILTER_LABELS
 const CHIP_ORDER: DashboardFilter[] = ['all', 'active', 'below-target', 'errors', 'blocked', 'paused', 'purchased']
 const SORT_LABELS: Record<DashboardSortMode, string> = {
-  smart: 'Smart', price: 'Price', recent: 'Recently checked', alpha: 'A–Z',
+  smart: t('Smart'), price: t('Price'), recent: t('Recently checked'), alpha: 'A–Z',
 }
 
 interface DashboardToolbarProps {
@@ -26,12 +27,12 @@ export default function DashboardToolbar({ filter, counts, sort, query, onQueryC
           type="search"
           value={query}
           onChange={e => onQueryChange(e.target.value)}
-          placeholder="Filter trackers…"
-          aria-label="Filter trackers"
+          placeholder={t('Filter trackers…')}
+          aria-label={t('Filter trackers')}
           className="pl-9 pr-3 py-2 w-56 bg-surface border border-border rounded-lg text-sm text-text placeholder:text-text-muted focus:outline-none focus:border-primary/60"
         />
       </div>
-      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filter by status">
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t('Filter by status')}>
         {CHIP_ORDER.map(f => {
           const selected = filter === f
           // Hide empty niche chips (paused/purchased/errors with 0) to avoid clutter;
@@ -59,7 +60,7 @@ export default function DashboardToolbar({ filter, counts, sort, query, onQueryC
         })}
       </div>
       <label className="ml-auto flex items-center gap-2 text-xs text-text-muted">
-        Sort
+        {t('Sort')}
         <select
           value={sort}
           onChange={e => onSortChange(e.target.value as DashboardSortMode)}

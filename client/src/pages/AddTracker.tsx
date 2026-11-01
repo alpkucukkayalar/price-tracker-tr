@@ -5,9 +5,10 @@ import { createTracker, testScrape, getTrackerUrls, updateTrackerUrlCondition } 
 import type { ScrapeResult, TrackerUrlCondition } from '../types'
 import useTitle from '../useTitle'
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 export default function AddTracker() {
-  useTitle('Add Tracker')
+  useTitle(t('Add Tracker'))
   const navigate = useNavigate()
   // Prefill from the share-target flow (phase 2): /add?url=...&name=...
   // Lazy initializers only — the params seed the form, they don't own it.
@@ -52,7 +53,7 @@ export default function AddTracker() {
         setName(prev => prev || result.title!)
       }
     } catch (err) {
-      setTestError(err instanceof Error ? err.message : 'Scrape failed')
+      setTestError(err instanceof Error ? err.message : t('Scrape failed'))
     } finally {
       setTesting(false)
     }
@@ -88,7 +89,7 @@ export default function AddTracker() {
       }
       navigate(`/tracker/${tracker.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create tracker')
+      setError(err instanceof Error ? err.message : t('Failed to create tracker'))
     } finally {
       setSaving(false)
     }
@@ -96,16 +97,16 @@ export default function AddTracker() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Add Tracker</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('Add Tracker')}</h1>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-medium text-text-muted mb-1.5">Product URL</label>
+          <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Product URL')}</label>
           <div className="flex gap-2">
             <input
               type="url"
               value={url}
               onChange={e => setUrl(e.target.value)}
-              placeholder="https://www.amazon.com/dp/..."
+              placeholder={t('https://www.amazon.com/dp/...')}
               required
               className="flex-1 bg-surface border border-border rounded-lg px-4 py-2.5 text-text placeholder-text-muted/50 focus:outline-none focus:border-primary"
             />
@@ -116,18 +117,17 @@ export default function AddTracker() {
               className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-border rounded-lg text-sm font-medium text-text-muted hover:text-text hover:border-primary/50 transition-colors disabled:opacity-50"
             >
               {testing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              Test
+              {t('Test')}
             </button>
           </div>
           {testResult && (testResult.outOfStock ? (
             <div className="mt-2 text-sm text-warning bg-warning/10 rounded-lg px-3 py-2">
-              Product found but currently out of stock — you can still track it and
-              get a back-in-stock alert.
+              {t('Product found but currently out of stock — you can still track it and get a back-in-stock alert.')}
             </div>
           ) : (
             <div className="mt-2 flex items-center gap-2 text-sm text-success bg-success/10 rounded-lg px-3 py-2">
               <CheckCircle className="w-4 h-4" />
-              Found: {formatMoney(testResult.price!)} (via {testResult.strategy})
+              {t('Found:')} {formatMoney(testResult.price!)} {t('(via')} {testResult.strategy})
             </div>
           ))}
           {testError && (
@@ -137,11 +137,11 @@ export default function AddTracker() {
 
         <div>
           <label className="block text-sm font-medium text-text-muted mb-1.5">
-            Name
+            {t('Name')}
             {testing && !name && (
               <span className="ml-2 inline-flex items-center gap-1 text-xs text-primary font-normal">
                 <Loader2 className="w-3 h-3 animate-spin" />
-                detecting product…
+                {t('detecting product…')}
               </span>
             )}
           </label>
@@ -149,7 +149,7 @@ export default function AddTracker() {
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            placeholder={testing && !name ? 'Detecting product name…' : 'Sony WH-1000XM5'}
+            placeholder={testing && !name ? t('Detecting product name…') : 'Sony WH-1000XM5'}
             required
             className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-text placeholder-text-muted/50 focus:outline-none focus:border-primary"
           />
@@ -157,23 +157,23 @@ export default function AddTracker() {
 
         <div>
           <label className="block text-sm font-medium text-text-muted mb-1.5">
-            Condition <span className="text-text-muted/50">(of this listing)</span>
+            {t('Condition')} <span className="text-text-muted/50">{t('(of this listing)')}</span>
           </label>
           <select
             value={condition}
             onChange={e => setCondition(e.target.value as TrackerUrlCondition)}
             className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-primary"
           >
-            <option value="new">New</option>
-            <option value="warehouse">Warehouse (Amazon Warehouse / used-like-new)</option>
-            <option value="refurb">Refurbished</option>
-            <option value="open_box">Open Box</option>
+            <option value="new">{t('New')}</option>
+            <option value="warehouse">{t('Warehouse (Amazon Warehouse / used-like-new)')}</option>
+            <option value="refurb">{t('Refurbished')}</option>
+            <option value="open_box">{t('Open Box')}</option>
           </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5">Target Price ($)</label>
+            <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Target Price ($)')}</label>
             <input
               type="number"
               value={thresholdPrice}
@@ -185,25 +185,25 @@ export default function AddTracker() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5">Check Interval</label>
+            <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Check Interval')}</label>
             <select
               value={interval}
               onChange={e => setInterval(e.target.value)}
               className="w-full bg-surface border border-border rounded-lg px-4 py-2.5 text-text focus:outline-none focus:border-primary"
             >
-              <option value="30">Every 30 min</option>
-              <option value="60">Every hour</option>
-              <option value="180">Every 3 hours</option>
-              <option value="360">Every 6 hours</option>
-              <option value="720">Every 12 hours</option>
-              <option value="1440">Daily</option>
+              <option value="30">{t('Every 30 min')}</option>
+              <option value="60">{t('Every hour')}</option>
+              <option value="180">{t('Every 3 hours')}</option>
+              <option value="360">{t('Every 6 hours')}</option>
+              <option value="720">{t('Every 12 hours')}</option>
+              <option value="1440">{t('Daily')}</option>
             </select>
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-text-muted mb-1.5">
-            CSS Selector <span className="text-text-muted/50">(optional override)</span>
+            {t('CSS Selector')} <span className="text-text-muted/50">{t('(optional override)')}</span>
           </label>
           <input
             type="text"
@@ -223,7 +223,7 @@ export default function AddTracker() {
           disabled={saving || !url || !name}
           className="w-full py-3 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors disabled:opacity-50"
         >
-          {saving ? 'Creating...' : 'Create Tracker'}
+          {saving ? 'Creating...' : t('Create Tracker')}
         </button>
       </form>
     </div>

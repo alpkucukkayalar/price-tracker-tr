@@ -1,3 +1,4 @@
+import { L } from '../lib/i18n.js';
 // server/src/notifications/web-push.ts
 import webpush from 'web-push';
 import {
@@ -101,8 +102,8 @@ export async function sendWebPushPriceAlert(
   // the user only sees the lock-screen preview (title) or expands.
   const title = `${formatPriceWithCondition(currentPrice, condition)} — ${tracker.name}`;
   const baseBody = tracker.last_price !== null && tracker.last_price > currentPrice
-    ? `Down from ${formatMoney(tracker.last_price)}`
-    : `Now at ${formatPriceWithCondition(currentPrice, condition)}`;
+    ? `${L('Down from ', 'Önceki fiyat: ')}${formatMoney(tracker.last_price)}`
+    : `${L('Now at ', 'Şu an ')}${formatPriceWithCondition(currentPrice, condition)}`;
 
   const prefix = confidence ? webPushBodyPrefix(confidence.level) : '';
   // Existing format keeps ` — ` between baseBody and aiCommentary so today's
@@ -131,7 +132,7 @@ export async function sendWebPushPurchaseArm(
   userId: number,
 ): Promise<boolean> {
   return dispatchToAllSubs(userId, {
-    title: `🛒 Ready to buy: ${trackerName}`,
+    title: `🛒 ${L('Ready to buy: ', 'Almaya hazır: ')}${trackerName}`,
     body: `Hit ${formatMoney(currentPrice)} (limit ${formatMoney(threshold)}). Tap to review & buy.`,
     url: buyUrl,
     tag: `purchase-arm-${userId}`,
@@ -147,7 +148,7 @@ export async function sendWebPushBasketAlert(
 ): Promise<boolean> {
   if (basket.total === null) return false;
 
-  const title = `Bundle Ready: ${project.name}`;
+  const title = `${L('Bundle Ready: ', 'Sepet Hazır: ')}${project.name}`;
   const baseBody = `${formatMoney(basket.total)} / ${formatMoney(project.target_total)} target (${basket.item_count} items)`;
   const body = aiCommentary ? `${baseBody} — ${aiCommentary}` : baseBody;
 

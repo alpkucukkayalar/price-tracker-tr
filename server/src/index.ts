@@ -227,3 +227,14 @@ function shutdown() {
 
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);
+
+// Never die silently: record the reason, then exit non-zero so the
+// supervisor (launchd / systemd / the Windows restart loop) starts us again.
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'Uncaught exception — exiting');
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  logger.fatal({ err: reason }, 'Unhandled promise rejection — exiting');
+  process.exit(1);
+});

@@ -8,6 +8,7 @@ import { BasketMembersTable } from '../components/BasketMembersTable';
 import { AddTrackerModal } from '../components/AddTrackerModal';
 import { RecentAlertsSection } from '../components/RecentAlertsSection';
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 export default function ProjectDetailPage() {
   const { id: idParam } = useParams<{ id: string }>();
@@ -65,7 +66,7 @@ export default function ProjectDetailPage() {
   }
 
   async function handleDelete() {
-    if (!confirm('Delete this project? This cannot be undone.')) return;
+    if (!confirm(t('Delete this project? This cannot be undone.'))) return;
     try {
       await deleteProject(id);
       navigate('/projects');
@@ -80,7 +81,7 @@ export default function ProjectDetailPage() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <Link to="/projects" className="inline-flex items-center gap-1.5 text-text-muted hover:text-text text-sm mb-4">
-        <ArrowLeft className="w-4 h-4" /> Projects
+        <ArrowLeft className="w-4 h-4" /> {t('Projects')}
       </Link>
 
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">
@@ -101,7 +102,7 @@ export default function ProjectDetailPage() {
               </h1>
             )}
             <div className="text-sm text-text-muted mt-1">
-              Target:{' '}
+              {t('Target:')}{' '}
               {editingTarget ? (
                 <input
                   autoFocus
@@ -121,10 +122,10 @@ export default function ProjectDetailPage() {
           </div>
           <div className="flex gap-2 flex-shrink-0">
             <button onClick={toggleArchive} className="px-2 py-1 text-sm border border-border rounded">
-              {data.project.status === 'active' ? 'Archive' : 'Unarchive'}
+              {data.project.status === 'active' ? t('Archive') : t('Unarchive')}
             </button>
             <button onClick={handleDelete} className="px-2 py-1 text-sm border border-border text-error rounded">
-              Delete
+              {t('Delete')}
             </button>
           </div>
         </div>
@@ -134,19 +135,19 @@ export default function ProjectDetailPage() {
 
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold">Items ({data.members.length})</h2>
+          <h2 className="font-semibold">{t('Items (')}{data.members.length})</h2>
           <button
             onClick={() => setShowAddModal(true)}
             className="px-3 py-1.5 rounded bg-primary text-white text-sm font-medium"
           >
-            + Add Tracker
+            {t('+ Add Tracker')}
           </button>
         </div>
         <BasketMembersTable projectId={id} members={data.members} onChange={reload} />
       </div>
 
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6">
-        <h2 className="font-semibold mb-3">Recent alerts</h2>
+        <h2 className="font-semibold mb-3">{t('Recent alerts')}</h2>
         <RecentAlertsSection notifications={data.recent_notifications} />
       </div>
 

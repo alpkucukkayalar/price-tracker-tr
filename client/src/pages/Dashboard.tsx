@@ -12,6 +12,7 @@ import DashboardToolbar from '../components/DashboardToolbar'
 import useTitle from '../useTitle'
 import { buildDashboardLayout, isErrored, isBelowTarget } from '../lib/dashboard-sort'
 import { parseFilter, parseSort, filterTrackers, filterCounts, sortTrackers, FILTER_LABELS } from '../lib/dashboard-filter'
+import { t, pl, tl } from '../lib/i18n'
 
 export default function Dashboard() {
   const [trackers, setTrackers] = useState<Tracker[]>([])
@@ -29,7 +30,7 @@ export default function Dashboard() {
   // component state — it's transient, not something you'd want to link to.
   const filter = parseFilter(searchParams.get('filter'))
   const sort = parseSort(searchParams.get('sort'))
-  useTitle(filter === 'all' ? 'Dashboard' : `Dashboard — ${FILTER_LABELS[filter]}`)
+  useTitle(filter === 'all' ? t('Dashboard') : `Dashboard — ${FILTER_LABELS[filter]}`)
 
   const setParam = (key: 'filter' | 'sort', value: string, defaultValue: string) => {
     const next = new URLSearchParams(searchParams)
@@ -48,7 +49,7 @@ export default function Dashboard() {
       )
       setOverlapCounts(counts)
     } catch (err) {
-      console.error('Failed to load trackers', err)
+      console.error(t('Failed to load trackers'), err)
     } finally {
       setLoading(false)
     }
@@ -71,7 +72,7 @@ export default function Dashboard() {
       const results = await Promise.allSettled(erroredTrackers.map(t => checkTracker(t.id)))
       const failed = results.filter(r => r.status === 'rejected').length
       if (failed > 0) {
-        setCheckAllError(`${failed} tracker${failed !== 1 ? 's' : ''} failed to refresh. Reloading anyway.`)
+        setCheckAllError(tl(`${failed} tracker${pl(failed)} failed to refresh. Reloading anyway.`, `${failed} ürün yenilenemedi. Yine de sayfa yenileniyor.`))
       }
       await load()
     } finally {
@@ -91,7 +92,7 @@ export default function Dashboard() {
   )
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-text-muted">Loading...</div>
+    return <div className="flex items-center justify-center h-64 text-text-muted">{t('Loading...')}</div>
   }
 
   if (trackers.length === 0) {
@@ -100,14 +101,14 @@ export default function Dashboard() {
         <WelcomeModal hasNoTrackers={true} />
         <div className="flex flex-col items-center justify-center h-80 gap-4">
           <Package className="w-16 h-16 text-text-muted/50" />
-          <h2 className="text-xl font-semibold text-text">No trackers yet</h2>
-          <p className="text-text-muted">Add a product URL to start tracking prices.</p>
+          <h2 className="text-xl font-semibold text-text">{t('No trackers yet')}</h2>
+          <p className="text-text-muted">{t('Add a product URL to start tracking prices.')}</p>
           <Link
             to="/add"
             className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium transition-colors no-underline"
           >
             <Plus className="w-4 h-4" />
-            Add Tracker
+            {t('Add Tracker')}
           </Link>
         </div>
       </>
@@ -132,11 +133,11 @@ export default function Dashboard() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl font-bold">{t('Dashboard')}</h1>
           <p className="text-text-muted text-sm mt-1">
-            {trackers.length} tracker{trackers.length !== 1 ? 's' : ''} &middot;{' '}
-            {totalActive} active
-            {totalErrored > 0 && <span className="text-danger"> &middot; {totalErrored} error{totalErrored !== 1 ? 's' : ''}</span>}
+            {trackers.length} {t('tracker')}{pl(trackers.length)} &middot;{' '}
+            {totalActive} {t('active')}
+            {totalErrored > 0 && <span className="text-danger"> &middot; {totalErrored} {t('error')}{pl(totalErrored)}</span>}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -145,7 +146,7 @@ export default function Dashboard() {
             className="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors no-underline"
           >
             <Plus className="w-4 h-4" />
-            Add Tracker
+            {t('Add Tracker')}
           </Link>
         </div>
       </div>
@@ -169,7 +170,7 @@ export default function Dashboard() {
             className="flex items-center justify-center gap-2 px-4 py-2 border border-primary text-primary hover:bg-primary/10 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${checkingAll ? 'animate-spin' : ''}`} />
-            {checkingAll ? `Checking ${counts.errors}...` : 'Check All Now'}
+            {checkingAll ? `Checking ${counts.errors}...` : t('Check All Now')}
           </button>
         </div>
       )}
@@ -182,7 +183,7 @@ export default function Dashboard() {
 
       {items.length === 0 ? (
         <div className="flex items-center justify-center h-40 text-text-muted text-sm">
-          No trackers match this filter — {FILTER_LABELS[filter]}.
+          {t('No trackers match this filter —')} {FILTER_LABELS[filter]}.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

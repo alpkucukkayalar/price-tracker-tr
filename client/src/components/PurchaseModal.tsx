@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Tracker } from '../types';
 import { formatMoney } from '../lib/money'
+import { t } from '../lib/i18n'
 
 /**
  * Convert a raw URL string (the server aliases `tracker_urls.url AS
@@ -8,7 +9,7 @@ import { formatMoney } from '../lib/money'
  * Falls back to the raw value if the input isn't parseable.
  */
 function toSellerDisplay(raw: string | null | undefined): string {
-  if (!raw) return 'Default';
+  if (!raw) return t('Default');
   try {
     return new URL(raw).hostname.replace(/^www\./, '');
   } catch {
@@ -88,11 +89,11 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
         onClick={e => e.stopPropagation()}
         className="bg-surface border border-border rounded-xl p-6 w-full max-w-md"
       >
-        <h2 className="text-xl font-bold text-text mb-1">Log Purchase</h2>
+        <h2 className="text-xl font-bold text-text mb-1">{t('Log Purchase')}</h2>
         <p className="text-xs text-text-muted mb-4">{tracker.name}</p>
 
         <label className="block text-xs text-text-muted mb-3">
-          Price paid
+          {t('Price paid')}
           <input
             type="number"
             step="0.01"
@@ -106,7 +107,7 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
         </label>
 
         <label className="block text-xs text-text-muted mb-3">
-          Quantity
+          {t('Quantity')}
           <input
             type="number"
             min="1"
@@ -119,7 +120,7 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
         </label>
 
         <label className="block text-xs text-text-muted mb-3">
-          Date
+          {t('Date')}
           <input
             type="date"
             value={date}
@@ -131,7 +132,7 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
 
         {sellers && sellers.length > 1 && (
           <label className="block text-xs text-text-muted mb-3">
-            Seller
+            {t('Seller')}
             <select
               value={sellerId ?? ''}
               onChange={e => setSellerId(Number(e.target.value))}
@@ -146,7 +147,7 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
         )}
 
         <div className="bg-bg rounded-lg px-3 py-2 my-4 text-sm text-text-muted">
-          Estimated savings: <span className="font-semibold text-success">{formatMoney(estimated)}</span>
+          {t('Estimated savings:')} <span className="font-semibold text-success">{formatMoney(estimated)}</span>
         </div>
 
         <label className="flex items-center gap-2 text-sm text-text mb-4">
@@ -156,7 +157,7 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
             onChange={e => setKeepWatching(e.target.checked)}
             aria-label="keep watching"
           />
-          Keep watching after purchase
+          {t('Keep watching after purchase')}
         </label>
 
         {error && (
@@ -171,14 +172,14 @@ export default function PurchaseModal({ tracker, firstPrice, sellers, onClose, o
             onClick={onClose}
             className="px-4 py-2 bg-surface-hover text-text-muted hover:text-text rounded-lg text-sm font-medium transition-colors"
           >
-            Cancel
+            {t('Cancel')}
           </button>
           <button
             type="submit"
             disabled={submitting}
             className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
           >
-            {submitting ? 'Saving…' : 'Confirm Purchase'}
+            {submitting ? 'Saving…' : t('Confirm Purchase')}
           </button>
         </div>
       </form>

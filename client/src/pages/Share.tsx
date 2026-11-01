@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Share2 } from 'lucide-react'
 import { matchTrackerByUrl } from '../api'
 import { cleanSharedTitle, extractSharedUrl } from '../lib/share-url'
+import { t } from '../lib/i18n'
 
 /**
  * Web Share Target landing page (deal-intelligence phase 2). Android's share
@@ -53,16 +54,15 @@ export default function Share() {
     return (
       <div className="max-w-md mx-auto text-center py-16">
         <Share2 className="w-10 h-10 mx-auto text-text-muted mb-4" />
-        <h1 className="text-lg font-semibold mb-2">Nothing to track in that share</h1>
+        <h1 className="text-lg font-semibold mb-2">{t('Nothing to track in that share')}</h1>
         <p className="text-sm text-text-muted mb-6">
-          The shared content didn&apos;t include a product link. Try sharing from the
-          product page itself, or add it by hand.
+          {t('The shared content didn\'t include a product link. Try sharing from the product page itself, or add it by hand.')}
         </p>
         <Link
           to="/add"
           className="inline-block px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium"
         >
-          Add a tracker manually
+          {t('Add a tracker manually')}
         </Link>
       </div>
     )
@@ -70,7 +70,7 @@ export default function Share() {
 
   return (
     <div className="flex items-center justify-center h-64 text-text-muted">
-      Looking up shared product…
+      {t('Looking up shared product…')}
     </div>
   )
 }

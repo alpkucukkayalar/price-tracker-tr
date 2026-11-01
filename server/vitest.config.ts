@@ -8,6 +8,6 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     exclude: ['node_modules', 'dist'],
     // Upstream tests assert US-dollar copy; the Turkish fork defaults to TRY.
-    env: { DISPLAY_CURRENCY: 'USD' },
+    env: { DISPLAY_CURRENCY: 'USD', DIGEST_TZ: 'America/Chicago', APP_LANG: 'en' },
   },
 })

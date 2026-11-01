@@ -17,10 +17,10 @@ import PurchaseModal from '../components/PurchaseModal'
 import PurchasedBanner from '../components/PurchasedBanner'
 
 const CONDITION_OPTIONS: Array<{ value: TrackerUrlCondition; label: string }> = [
-  { value: 'new', label: 'New' },
-  { value: 'warehouse', label: 'Warehouse' },
-  { value: 'refurb', label: 'Refurbished' },
-  { value: 'open_box', label: 'Open Box' },
+  { value: 'new', label: t('New') },
+  { value: 'warehouse', label: t('Warehouse') },
+  { value: 'refurb', label: t('Refurbished') },
+  { value: 'open_box', label: t('Open Box') },
 ]
 
 function conditionBadgeClass(c: TrackerUrlCondition): string {
@@ -31,15 +31,17 @@ function conditionBadgeClass(c: TrackerUrlCondition): string {
 }
 
 function conditionLabel(c: TrackerUrlCondition): string {
-  if (c === 'warehouse') return 'Warehouse'
-  if (c === 'refurb') return 'Refurbished'
-  if (c === 'open_box') return 'Open Box'
-  return 'New'
+  if (c === 'warehouse') return t('Warehouse')
+  if (c === 'refurb') return t('Refurbished')
+  if (c === 'open_box') return t('Open Box')
+  return t('New')
 }
 import StatusBadge from '../components/StatusBadge'
 import { AIInsightsCard } from '../components/AIInsightsCard'
 import useTitle from '../useTitle'
 import { formatMoney } from '../lib/money'
+import FindElsewhere from '../components/FindElsewhere'
+import { t, uiLocale, ago } from '../lib/i18n'
 
 // PriceChart pulls in recharts (~180 KB). Lazy load it so the initial
 // TrackerDetail render can paint everything else while recharts streams
@@ -109,7 +111,7 @@ export default function TrackerDetail() {
   const [purchases, setPurchases] = useState<Purchase[]>([])
 
   const trackerId = Number(id)
-  useTitle(tracker?.name || 'Tracker')
+  useTitle(tracker?.name || t('Tracker'))
 
   const load = async () => {
     try {
@@ -186,7 +188,7 @@ export default function TrackerDetail() {
   }
 
   const handleDeleteSeller = async (sellerId: number) => {
-    if (!confirm('Delete this seller URL? Its price history will be disassociated but not deleted.')) return
+    if (!confirm(t('Delete this seller URL? Its price history will be disassociated but not deleted.'))) return
     setSellerError(null)
     try {
       const updated = await deleteTrackerUrl(trackerId, sellerId)
@@ -202,13 +204,13 @@ export default function TrackerDetail() {
   }
 
   function timeAgo(dateStr: string | null): string {
-    if (!dateStr) return 'Never'
+    if (!dateStr) return t('Never')
     const date = new Date(dateStr.includes('Z') ? dateStr : dateStr + 'Z')
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000)
-    if (seconds < 60) return 'Just now'
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-    return `${Math.floor(seconds / 86400)}d ago`
+    if (seconds < 60) return t('Just now')
+    if (seconds < 3600) return ago(Math.floor(seconds / 60), 'm')
+    if (seconds < 86400) return ago(Math.floor(seconds / 3600), 'h')
+    return ago(Math.floor(seconds / 86400), 'd')
   }
 
   useEffect(() => { load() }, [trackerId, range])
@@ -242,7 +244,7 @@ export default function TrackerDetail() {
   }
 
   const handleDelete = async () => {
-    if (!confirm('Delete this tracker and all price history?')) return
+    if (!confirm(t('Delete this tracker and all price history?'))) return
     await deleteTracker(trackerId)
     navigate('/')
   }
@@ -263,11 +265,11 @@ export default function TrackerDetail() {
     const endIso = dateTimeLocalToIso(doorbusterEnd)
     const intervalNum = doorbusterInterval ? parseInt(doorbusterInterval) : NaN
     if (!startIso || !endIso || !Number.isFinite(intervalNum) || intervalNum < 1) {
-      setDoorbusterError('All three fields are required; interval must be at least 1 minute.')
+      setDoorbusterError(t('All three fields are required; interval must be at least 1 minute.'))
       return
     }
     if (new Date(startIso) >= new Date(endIso)) {
-      setDoorbusterError('Start must be before end.')
+      setDoorbusterError(t('Start must be before end.'))
       return
     }
     setDoorbusterSaving(true)
@@ -318,19 +320,19 @@ export default function TrackerDetail() {
   }
 
   if (loading || !tracker) {
-    return <div className="flex items-center justify-center h-64 text-text-muted">Loading...</div>
+    return <div className="flex items-center justify-center h-64 text-text-muted">{t('Loading...')}</div>
   }
 
   return (
     <div>
       <Link to="/" className="inline-flex items-center gap-1.5 text-text-muted hover:text-text text-sm mb-4 no-underline">
         <ArrowLeft className="w-4 h-4" />
-        Back to Dashboard
+        {t('Back to Dashboard')}
       </Link>
 
       {sharedDuplicate && (
         <div className="bg-primary/10 border border-primary/30 text-primary rounded-lg px-4 py-2 mb-4 text-sm">
-          You&apos;re already tracking this product — the shared link matched this tracker.
+          {t('You\'re already tracking this product — the shared link matched this tracker.')}
         </div>
       )}
 
@@ -362,7 +364,7 @@ export default function TrackerDetail() {
                 rel="noopener noreferrer"
                 className="text-text-muted text-xs hover:text-primary flex items-center gap-1 mt-1"
               >
-                <span>View public page →</span>
+                <span>{t('View public page →')}</span>
               </a>
             )}
             {/* Wishlist toggle. The PATCH at /api/wishlist/items/:id is the
@@ -380,9 +382,9 @@ export default function TrackerDetail() {
                   ? 'bg-primary text-white'
                   : 'bg-surface border border-border text-text-muted hover:border-primary'
               }`}
-              title={tracker.is_wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+              title={tracker.is_wishlisted ? t('Remove from wishlist') : t('Add to wishlist')}
             >
-              {tracker.is_wishlisted ? '🎁 On wishlist' : '+ Add to wishlist'}
+              {tracker.is_wishlisted ? t('🎁 On wishlist') : t('+ Add to wishlist')}
             </button>
           </div>
           <div className="flex-shrink-0">
@@ -392,13 +394,13 @@ export default function TrackerDetail() {
 
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-4">
           <div className="bg-bg rounded-lg p-3">
-            <div className="text-xs text-text-muted mb-1">Current Price</div>
+            <div className="text-xs text-text-muted mb-1">{t('Current Price')}</div>
             <div className="text-xl font-bold">
               {tracker.last_price != null ? `${formatMoney(tracker.last_price)}` : '--'}
             </div>
           </div>
           <div className="bg-bg rounded-lg p-3">
-            <div className="text-xs text-text-muted mb-1">Target Price</div>
+            <div className="text-xs text-text-muted mb-1">{t('Target Price')}</div>
             {editing ? (
               <input
                 type="number"
@@ -414,19 +416,19 @@ export default function TrackerDetail() {
             )}
           </div>
           <div className="bg-bg rounded-lg p-3">
-            <div className="text-xs text-text-muted mb-1">Check Interval</div>
+            <div className="text-xs text-text-muted mb-1">{t('Check Interval')}</div>
             {editing ? (
               <select
                 value={editInterval}
                 onChange={e => setEditInterval(e.target.value)}
                 className="bg-surface border border-border rounded px-2 py-1 text-text text-sm w-full focus:outline-none focus:border-primary"
               >
-                <option value="30">30 min</option>
-                <option value="60">1 hour</option>
-                <option value="180">3 hours</option>
-                <option value="360">6 hours</option>
-                <option value="720">12 hours</option>
-                <option value="1440">Daily</option>
+                <option value="30">{t('30 min')}</option>
+                <option value="60">{t('1 hour')}</option>
+                <option value="180">{t('3 hours')}</option>
+                <option value="360">{t('6 hours')}</option>
+                <option value="720">{t('12 hours')}</option>
+                <option value="1440">{t('Daily')}</option>
               </select>
             ) : (
               <div className="text-xl font-bold">
@@ -437,18 +439,18 @@ export default function TrackerDetail() {
             )}
           </div>
           <div className="bg-bg rounded-lg p-3">
-            <div className="text-xs text-text-muted mb-1">All-Time Low</div>
+            <div className="text-xs text-text-muted mb-1">{t('All-Time Low')}</div>
             <div className="text-xl font-bold text-success">
               {allTimeLow ? `${formatMoney(allTimeLow.price)}` : '--'}
             </div>
             {allTimeLow && (
               <div className="text-[10px] text-text-muted mt-0.5">
-                {new Date(allTimeLow.at.includes('Z') ? allTimeLow.at : allTimeLow.at + 'Z').toLocaleDateString()}
+                {new Date(allTimeLow.at.includes('Z') ? allTimeLow.at : allTimeLow.at + 'Z').toLocaleDateString(uiLocale())}
               </div>
             )}
           </div>
           <div className="bg-bg rounded-lg p-3">
-            <div className="text-xs text-text-muted mb-1">Data Points</div>
+            <div className="text-xs text-text-muted mb-1">{t('Data Points')}</div>
             <div className="text-xl font-bold">{prices.length}</div>
           </div>
         </div>
@@ -457,34 +459,34 @@ export default function TrackerDetail() {
           {editing ? (
             <>
               <button onClick={handleSaveEdit} className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors">
-                Save
+                {t('Save')}
               </button>
               <button onClick={() => setEditing(false)} className="px-4 py-2 bg-surface-hover text-text-muted rounded-lg text-sm font-medium transition-colors">
-                Cancel
+                {t('Cancel')}
               </button>
             </>
           ) : (
             <>
               <button onClick={handleCheck} disabled={checking} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
                 <RefreshCw className={`w-4 h-4 ${checking ? 'animate-spin' : ''}`} />
-                Check Now
+                {t('Check Now')}
               </button>
               <button onClick={handleToggleStatus} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-surface-hover text-text-muted hover:text-text rounded-lg text-sm font-medium transition-colors">
-                {tracker.status === 'active' ? <><Pause className="w-4 h-4" /> Pause</> : <><Play className="w-4 h-4" /> Resume</>}
+                {tracker.status === 'active' ? <><Pause className="w-4 h-4" /> {t('Pause')}</> : <><Play className="w-4 h-4" /> {t('Resume')}</>}
               </button>
               <button onClick={startEdit} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-surface-hover text-text-muted hover:text-text rounded-lg text-sm font-medium transition-colors">
-                <Pencil className="w-4 h-4" /> Edit
+                <Pencil className="w-4 h-4" /> {t('Edit')}
               </button>
               <button
                 onClick={() => setShowPurchaseModal(true)}
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-success/15 text-success hover:bg-success/25 rounded-lg text-sm font-medium transition-colors"
-                title={purchases.length > 0 ? 'Log another purchase for this tracker' : 'Mark this tracker as purchased'}
+                title={purchases.length > 0 ? t('Log another purchase for this tracker') : t('Mark this tracker as purchased')}
               >
                 <ShoppingBag className="w-4 h-4" />
-                {purchases.length > 0 ? 'Log Another Purchase' : 'Purchased'}
+                {purchases.length > 0 ? t('Log Another Purchase') : t('Purchased')}
               </button>
               <button onClick={handleDelete} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-danger/10 text-danger hover:bg-danger/20 rounded-lg text-sm font-medium transition-colors sm:ml-auto">
-                <Trash2 className="w-4 h-4" /> Delete
+                <Trash2 className="w-4 h-4" /> {t('Delete')}
               </button>
             </>
           )}
@@ -494,9 +496,9 @@ export default function TrackerDetail() {
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">
         <div className="flex items-center gap-2 mb-4">
           <Store className="w-5 h-5 text-primary flex-shrink-0" />
-          <h2 className="text-lg font-semibold">Sellers</h2>
+          <h2 className="text-lg font-semibold">{t('Sellers')}</h2>
           <span className="text-xs text-text-muted">
-            {sellers.length} {sellers.length === 1 ? 'URL' : 'URLs'} tracked
+            {sellers.length} {sellers.length === 1 ? 'URL' : 'URLs'} {t('tracked')}
           </span>
         </div>
 
@@ -504,11 +506,11 @@ export default function TrackerDetail() {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-text-muted text-xs border-b border-border">
-                <th className="text-left py-2 font-medium">Seller</th>
-                <th className="text-left py-2 font-medium pl-4">Condition</th>
-                <th className="text-right py-2 font-medium">Price</th>
-                <th className="text-left py-2 font-medium pl-4">Last checked</th>
-                <th className="text-left py-2 font-medium pl-4">Status</th>
+                <th className="text-left py-2 font-medium">{t('Seller')}</th>
+                <th className="text-left py-2 font-medium pl-4">{t('Condition')}</th>
+                <th className="text-right py-2 font-medium">{t('Price')}</th>
+                <th className="text-left py-2 font-medium pl-4">{t('Last checked')}</th>
+                <th className="text-left py-2 font-medium pl-4">{t('Status')}</th>
                 <th className="py-2 w-8"></th>
               </tr>
             </thead>
@@ -529,17 +531,17 @@ export default function TrackerDetail() {
                       >
                         <span className="truncate">{host}</span>
                         {s.position === 0 && (
-                          <span className="text-[10px] text-text-muted bg-surface-hover rounded px-1.5 py-0.5 flex-shrink-0">primary</span>
+                          <span className="text-[10px] text-text-muted bg-surface-hover rounded px-1.5 py-0.5 flex-shrink-0">{t('primary')}</span>
                         )}
                         {isLowest && sellers.length > 1 && (
-                          <span className="text-[10px] text-success bg-success/10 rounded px-1.5 py-0.5 flex-shrink-0">lowest</span>
+                          <span className="text-[10px] text-success bg-success/10 rounded px-1.5 py-0.5 flex-shrink-0">{t('lowest')}</span>
                         )}
                         {s.availability === 'out_of_stock' && (
                           <span
                             className="text-[10px] text-warning bg-warning/10 rounded px-1.5 py-0.5 flex-shrink-0"
-                            title="This seller reports the product out of stock — you'll get an alert when it returns"
+                            title={t('This seller reports the product out of stock — you\'ll get an alert when it returns')}
                           >
-                            out of stock
+                            {t('out of stock')}
                           </span>
                         )}
                         {s.condition !== 'new' && (
@@ -558,7 +560,7 @@ export default function TrackerDetail() {
                         value={s.condition}
                         onChange={e => handleChangeSellerCondition(s.id, e.target.value as TrackerUrlCondition)}
                         className="bg-bg border border-border rounded px-2 py-0.5 text-xs text-text focus:outline-none focus:border-primary"
-                        title="Change listing condition"
+                        title={t('Change listing condition')}
                       >
                         {CONDITION_OPTIONS.map(opt => (
                           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -573,16 +575,16 @@ export default function TrackerDetail() {
                     </td>
                     <td className="py-2 pl-4">
                       {s.last_error ? (
-                        <span className="text-danger text-xs" title={s.last_error}>error</span>
+                        <span className="text-danger text-xs" title={s.last_error}>{t('error')}</span>
                       ) : (
-                        <span className="text-text-muted text-xs capitalize">{s.status}</span>
+                        <span className="text-text-muted text-xs capitalize">{t(s.status.charAt(0).toUpperCase() + s.status.slice(1))}</span>
                       )}
                     </td>
                     <td className="py-2 text-right">
                       <button
                         onClick={() => handleDeleteSeller(s.id)}
                         disabled={sellers.length <= 1}
-                        title={sellers.length <= 1 ? 'Cannot delete the last seller' : 'Remove seller'}
+                        title={sellers.length <= 1 ? t('Cannot delete the last seller') : t('Remove seller')}
                         className="p-1 rounded text-text-muted hover:text-danger hover:bg-danger/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       >
                         <X className="w-4 h-4" />
@@ -600,7 +602,7 @@ export default function TrackerDetail() {
             type="url"
             value={newSellerUrl}
             onChange={e => setNewSellerUrl(e.target.value)}
-            placeholder="https://www.retailer.com/product/..."
+            placeholder={t('https://www.retailer.com/product/...')}
             className="flex-1 bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text placeholder-text-muted/50 focus:outline-none focus:border-primary"
             onKeyDown={e => { if (e.key === 'Enter') handleAddSeller() }}
           />
@@ -608,7 +610,7 @@ export default function TrackerDetail() {
             value={newSellerCondition}
             onChange={e => setNewSellerCondition(e.target.value as TrackerUrlCondition)}
             className="bg-bg border border-border rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary"
-            title="Listing condition for the new seller URL"
+            title={t('Listing condition for the new seller URL')}
           >
             {CONDITION_OPTIONS.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -620,7 +622,7 @@ export default function TrackerDetail() {
             className="flex items-center justify-center gap-2 px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
           >
             <Plus className="w-4 h-4" />
-            {addingSellerBusy ? 'Adding & scraping...' : 'Add Seller'}
+            {addingSellerBusy ? t('Adding & scraping...') : t('Add Seller')}
           </button>
         </div>
         {sellerError && (
@@ -628,12 +630,17 @@ export default function TrackerDetail() {
             {sellerError}
           </div>
         )}
+        <FindElsewhere
+          trackerId={trackerId}
+          trackerName={tracker.name}
+          onAdded={async updated => { setSellers(updated); await load() }}
+        />
       </div>
 
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">
         <div className="flex items-center gap-2 mb-3">
           <Zap className="w-5 h-5 text-warning" />
-          <h2 className="text-lg font-semibold">Doorbuster mode</h2>
+          <h2 className="text-lg font-semibold">{t('Doorbuster mode')}</h2>
           {(() => {
             // Inline status banner (matches the card-badge logic on TrackerCard).
             const start = tracker.doorbuster_start_at ? new Date(tracker.doorbuster_start_at) : null
@@ -644,20 +651,20 @@ export default function TrackerDetail() {
               if (now >= start && now <= end) {
                 return (
                   <span className="inline-flex items-center gap-1 text-xs font-medium bg-warning/15 text-warning rounded-full px-2 py-0.5 ml-1">
-                    <Zap className="w-3 h-3" /> Active until {end.toLocaleString()}
+                    <Zap className="w-3 h-3" /> {t('Active until')} {end.toLocaleString(uiLocale())}
                   </span>
                 )
               }
               if (now < start) {
                 return (
                   <span className="text-xs text-text-muted ml-1">
-                    Scheduled to start {start.toLocaleString()}
+                    {t('Scheduled to start')} {start.toLocaleString(uiLocale())}
                   </span>
                 )
               }
               return (
                 <span className="text-xs text-text-muted ml-1">
-                  Ended {end.toLocaleString()}
+                  {t('Ended')} {end.toLocaleString(uiLocale())}
                 </span>
               )
             }
@@ -665,14 +672,13 @@ export default function TrackerDetail() {
           })()}
         </div>
         <p className="text-text-muted text-xs mb-3">
-          During the window, this tracker is checked at the accelerated cadence below
-          (e.g., every 3 min) instead of its usual {tracker.check_interval_minutes >= 60
+          {t('During the window, this tracker is checked at the accelerated cadence below (e.g., every 3 min) instead of its usual')} {tracker.check_interval_minutes >= 60
             ? `${tracker.check_interval_minutes / 60}h`
-            : `${tracker.check_interval_minutes}m`} interval. Outside the window, normal scheduling applies.
+            : `${tracker.check_interval_minutes}m`} {t('interval. Outside the window, normal scheduling applies.')}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
           <label className="text-xs text-text-muted">
-            Start
+            {t('Start')}
             <input
               type="datetime-local"
               value={doorbusterStart}
@@ -681,7 +687,7 @@ export default function TrackerDetail() {
             />
           </label>
           <label className="text-xs text-text-muted">
-            End
+            {t('End')}
             <input
               type="datetime-local"
               value={doorbusterEnd}
@@ -690,7 +696,7 @@ export default function TrackerDetail() {
             />
           </label>
           <label className="text-xs text-text-muted">
-            Interval (minutes)
+            {t('Interval (minutes)')}
             <input
               type="number"
               min={1}
@@ -708,7 +714,7 @@ export default function TrackerDetail() {
             disabled={doorbusterSaving}
             className="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
           >
-            {doorbusterSaving ? 'Saving...' : 'Save doorbuster'}
+            {doorbusterSaving ? 'Saving...' : t('Save doorbuster')}
           </button>
           {(tracker.doorbuster_start_at || tracker.doorbuster_end_at || tracker.doorbuster_interval_minutes) && (
             <button
@@ -716,7 +722,7 @@ export default function TrackerDetail() {
               disabled={doorbusterSaving}
               className="px-4 py-2 bg-surface-hover text-text-muted hover:text-text rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
             >
-              Clear doorbuster
+              {t('Clear doorbuster')}
             </button>
           )}
         </div>
@@ -739,34 +745,33 @@ export default function TrackerDetail() {
           <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">
             <div className="flex items-center gap-2 mb-3">
               <ShoppingBag className="w-5 h-5 text-amber-500" />
-              <h2 className="text-lg font-semibold">Arm for purchase</h2>
+              <h2 className="text-lg font-semibold">{t('Arm for purchase')}</h2>
               {!!tracker.buy_armed && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium bg-amber-500/15 text-amber-600 rounded-full px-2 py-0.5 ml-1">
-                  Armed
+                  {t('Armed')}
                 </span>
               )}
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <p className="text-text-muted text-xs max-w-prose">
-                When this tracker hits your target price, you'll receive a one-tap approval
-                link to buy on Amazon. Nothing is purchased without your tap.
+                {t('When this tracker hits your target price, you\'ll receive a one-tap approval link to buy on Amazon. Nothing is purchased without your tap.')}
               </p>
               <button
                 onClick={handleToggleArm}
                 disabled={!isAmazonSeller}
-                title={isAmazonSeller ? undefined : 'Amazon only in v1'}
+                title={isAmazonSeller ? undefined : t('Amazon only in v1')}
                 className={`flex-shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 ${
                   tracker.buy_armed
                     ? 'bg-amber-500 text-white hover:bg-amber-600'
                     : 'bg-surface-hover text-text-muted hover:text-text border border-border'
                 }`}
               >
-                {tracker.buy_armed ? '🛒 Armed — tap to disarm' : 'Arm'}
+                {tracker.buy_armed ? t('🛒 Armed — tap to disarm') : t('Arm')}
               </button>
             </div>
             {!tracker.buy_armed && (
               <label className="mt-3 text-sm flex items-center gap-2 text-text-muted">
-                Quantity
+                {t('Quantity')}
                 <input
                   type="number"
                   min={1}
@@ -778,7 +783,7 @@ export default function TrackerDetail() {
             )}
             {!isAmazonSeller && (
               <div className="mt-2 text-xs text-text-muted bg-bg rounded-lg px-3 py-2">
-                Arming is Amazon-only in v1. Add an Amazon seller URL above to enable this feature.
+                {t('Arming is Amazon-only in v1. Add an Amazon seller URL above to enable this feature.')}
               </div>
             )}
           </div>
@@ -789,12 +794,12 @@ export default function TrackerDetail() {
         <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mb-6">
           <div className="flex items-center gap-2 mb-3">
             <Users className="w-5 h-5 text-primary" />
-            <h2 className="text-lg font-semibold">Community</h2>
+            <h2 className="text-lg font-semibold">{t('Community')}</h2>
           </div>
           <p className="text-text-muted text-sm">
-            Also tracked by {overlap.count} {overlap.count === 1 ? 'other user' : 'others'}
+            {t('Also tracked by')} {overlap.count} {overlap.count === 1 ? 'other user' : 'others'}
             {overlap.names.length > 0 && (
-              <> — shared by <span className="text-text font-medium">{overlap.names.join(', ')}</span></>
+              <> {t('— shared by')} <span className="text-text font-medium">{overlap.names.join(', ')}</span></>
             )}
             .
           </p>
@@ -804,7 +809,7 @@ export default function TrackerDetail() {
             && overlap.communityLow < tracker.last_price && (
               <div className="inline-flex items-center gap-1 text-sm text-success bg-success/10 rounded-full px-2.5 py-1 mt-3">
                 <TrendingDown className="w-4 h-4" />
-                Community low: {formatMoney(overlap.communityLow)}
+                {t('Community low:')} {formatMoney(overlap.communityLow)}
               </div>
             )}
         </div>
@@ -826,12 +831,12 @@ export default function TrackerDetail() {
 
       <div className="bg-surface border border-border rounded-xl p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <h2 className="text-lg font-semibold">Price History</h2>
+          <h2 className="text-lg font-semibold">{t('Price History')}</h2>
           <div className="flex flex-wrap items-center gap-2">
             <a
               href={`/api/trackers/${trackerId}/export?format=csv`}
               className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium bg-surface-hover text-text-muted hover:text-text transition-colors no-underline"
-              title="Download full price history as CSV"
+              title={t('Download full price history as CSV')}
             >
               <Download className="w-3.5 h-3.5" />
               CSV
@@ -839,7 +844,7 @@ export default function TrackerDetail() {
             <a
               href={`/api/trackers/${trackerId}/export?format=json`}
               className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium bg-surface-hover text-text-muted hover:text-text transition-colors no-underline"
-              title="Download full price history as JSON"
+              title={t('Download full price history as JSON')}
             >
               <Download className="w-3.5 h-3.5" />
               JSON
@@ -857,7 +862,7 @@ export default function TrackerDetail() {
             ))}
           </div>
         </div>
-        <Suspense fallback={<div className="flex items-center justify-center h-64 text-text-muted text-sm">Loading chart...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center h-64 text-text-muted text-sm">{t('Loading chart...')}</div>}>
           <PriceChart data={prices} threshold={tracker.threshold_price} />
         </Suspense>
 
@@ -866,15 +871,15 @@ export default function TrackerDetail() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-text-muted text-xs border-b border-border">
-                  <th className="text-left py-2 font-medium">Date</th>
-                  <th className="text-right py-2 font-medium">Price</th>
+                  <th className="text-left py-2 font-medium">{t('Date')}</th>
+                  <th className="text-right py-2 font-medium">{t('Price')}</th>
                 </tr>
               </thead>
               <tbody>
                 {[...prices].reverse().slice(0, 50).map(p => (
                   <tr key={p.id} className="border-b border-border/50">
                     <td className="py-2 text-text-muted">
-                      {new Date(p.scraped_at.includes('Z') ? p.scraped_at : p.scraped_at + 'Z').toLocaleString()}
+                      {new Date(p.scraped_at.includes('Z') ? p.scraped_at : p.scraped_at + 'Z').toLocaleString(uiLocale())}
                     </td>
                     <td className="py-2 text-right font-medium">{formatMoney(p.price)}</td>
                   </tr>
@@ -904,16 +909,16 @@ export default function TrackerDetail() {
 
       {alerts.length > 0 && (
         <div className="bg-surface border border-border rounded-xl p-4 sm:p-6 mt-6">
-          <h2 className="text-lg font-semibold mb-4">Recent Alerts</h2>
+          <h2 className="text-lg font-semibold mb-4">{t('Recent Alerts')}</h2>
           <div className="overflow-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-text-muted text-xs border-b border-border">
-                  <th className="text-left py-2 font-medium">Sent</th>
-                  <th className="text-left py-2 font-medium pl-4">Seller</th>
-                  <th className="text-left py-2 font-medium pl-4">Channel</th>
-                  <th className="text-right py-2 font-medium">Price</th>
-                  <th className="text-right py-2 font-medium">Savings</th>
+                  <th className="text-left py-2 font-medium">{t('Sent')}</th>
+                  <th className="text-left py-2 font-medium pl-4">{t('Seller')}</th>
+                  <th className="text-left py-2 font-medium pl-4">{t('Channel')}</th>
+                  <th className="text-right py-2 font-medium">{t('Price')}</th>
+                  <th className="text-right py-2 font-medium">{t('Savings')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -925,7 +930,7 @@ export default function TrackerDetail() {
                   return (
                     <tr key={a.id} className="border-b border-border/50">
                       <td className="py-2 text-text-muted whitespace-nowrap">
-                        {new Date(a.sent_at.includes('Z') ? a.sent_at : a.sent_at + 'Z').toLocaleString()}
+                        {new Date(a.sent_at.includes('Z') ? a.sent_at : a.sent_at + 'Z').toLocaleString(uiLocale())}
                       </td>
                       <td className="py-2 pl-4 text-text-muted">{sellerHost}</td>
                       <td className="py-2 pl-4 text-text-muted capitalize">{a.channel || 'unknown'}</td>

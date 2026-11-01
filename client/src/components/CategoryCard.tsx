@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Folder, AlertCircle, TrendingDown } from 'lucide-react'
 import type { Tracker } from '../types'
+import { t, pl } from '../lib/i18n'
 
 function getFaviconUrl(hostname: string): string {
   // Local proxy so we don't leak the user's retailer list to a third party
@@ -40,12 +41,12 @@ export default function CategoryCard({ hostname, trackers }: Props) {
               className="w-3.5 h-3.5 rounded-sm flex-shrink-0"
               onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
             />
-            Category
+            {t('Category')}
           </div>
         </div>
         <div className="text-right flex-shrink-0">
           <div className="text-3xl font-bold tracking-tight text-text">{trackers.length}</div>
-          <div className="text-xs text-text-muted">trackers</div>
+          <div className="text-xs text-text-muted">{t('trackers')}</div>
         </div>
       </div>
 
@@ -53,18 +54,18 @@ export default function CategoryCard({ hostname, trackers }: Props) {
         {erroredCount > 0 && (
           <span className="inline-flex items-center gap-1 text-xs font-medium text-danger bg-danger/10 rounded-full px-2.5 py-1">
             <AlertCircle className="w-3 h-3" />
-            {erroredCount} error{erroredCount !== 1 ? 's' : ''}
+            {erroredCount} {t('error')}{pl(erroredCount)}
           </span>
         )}
         {belowTargetCount > 0 && (
           <span className="inline-flex items-center gap-1 text-xs font-medium text-success bg-success/10 rounded-full px-2.5 py-1">
             <TrendingDown className="w-3 h-3" />
-            {belowTargetCount} below target
+            {belowTargetCount} {t('below target')}
           </span>
         )}
         {pausedCount > 0 && (
           <span className="inline-flex items-center gap-1 text-xs font-medium text-text-muted bg-surface-hover rounded-full px-2.5 py-1">
-            {pausedCount} paused
+            {pausedCount} {t('paused')}
           </span>
         )}
       </div>

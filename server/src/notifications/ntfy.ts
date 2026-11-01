@@ -1,3 +1,4 @@
+import { L } from '../lib/i18n.js';
 import type { Tracker, TrackerUrlCondition } from '../db/queries.js';
 import type { Confidence } from '../ai/confidence.js';
 import { logger } from '../logger.js';
@@ -114,8 +115,8 @@ export async function sendNtfyPriceAlert(
 
   // formatPriceWithCondition tags non-'new' conditions: "Now $239 (Warehouse)".
   const baseMessage = tracker.threshold_price
-    ? `Now ${formatPriceWithCondition(currentPrice, condition)} (target ${formatMoney(tracker.threshold_price)}, save ${formatMoney((tracker.threshold_price - currentPrice))})`
-    : `Now ${formatPriceWithCondition(currentPrice, condition)}`;
+    ? `${L('Now', 'Şu an')} ${formatPriceWithCondition(currentPrice, condition)} (${L('target', 'hedef')} ${formatMoney(tracker.threshold_price)}, ${L('save', 'kazanç')} ${formatMoney((tracker.threshold_price - currentPrice))})`
+    : `${L('Now', 'Şu an')} ${formatPriceWithCondition(currentPrice, condition)}`;
   const messageParts: string[] = [baseMessage];
   if (low) messageParts.push(`${low.tier === 'back_in_stock' ? '📦' : '📉'} ${low.context}`);
   if (aiCommentary) messageParts.push(aiCommentary);
@@ -128,8 +129,8 @@ export async function sendNtfyPriceAlert(
   const result = await publish(target.base, {
     topic: target.topic,
     title: low && !tracker.threshold_price
-      ? `${titlePrefix}${low.tier === 'back_in_stock' ? 'Back in Stock' : 'Record Low'}: ${tracker.name}`
-      : `${titlePrefix}Price Drop: ${tracker.name}`,
+      ? `${titlePrefix}${low.tier === 'back_in_stock' ? L('Back in Stock', 'Tekrar Stokta') : L('Record Low', 'En Düşük Fiyat')}: ${tracker.name}`
+      : `${titlePrefix}${L('Price Drop: ', 'Fiyat Düştü: ')}${tracker.name}`,
     message,
     priority: 4,
     tags: ['tada', 'money_with_wings'],
@@ -191,8 +192,8 @@ export async function sendNtfyErrorAlert(
 
   const result = await publish(target.base, {
     topic: target.topic,
-    title: `Tracker Error: ${tracker.name}`,
-    message: `Scrape failed ${tracker.consecutive_failures}x: ${error.slice(0, 300)}`,
+    title: `${L('Tracker Error: ', 'Takip Hatası: ')}${tracker.name}`,
+    message: `${L('Scrape failed ', 'Fiyat okunamadı ')}${tracker.consecutive_failures}x: ${error.slice(0, 300)}`,
     priority: 3,
     tags: ['warning'],
     click: tracker.url,
@@ -228,12 +229,12 @@ export async function sendNtfyBasketAlert(
   const memberLines = members
     .map(m => `• ${m.tracker_name} — ${formatMoney((m.last_price ?? 0))}`)
     .join('\n');
-  const baseBody = `Total: ${formatMoney(basket.total)} (target ${formatMoney(project.target_total)}, savings ${savings})\n\n${memberLines}`;
+  const baseBody = `${L('Total', 'Toplam')}: ${formatMoney(basket.total)} (${L('target', 'hedef')} ${formatMoney(project.target_total)}, ${L('savings', 'tasarruf')} ${savings})\n\n${memberLines}`;
   const message = aiCommentary ? `${baseBody}\n\n${aiCommentary}` : baseBody;
 
   const result = await publish(target.base, {
     topic: target.topic,
-    title: `Bundle Ready: ${project.name}`,
+    title: `${L('Bundle Ready: ', 'Sepet Hazır: ')}${project.name}`,
     message,
     priority: 4,
     tags: ['tada', 'money_with_wings'],
@@ -265,7 +266,7 @@ export async function sendNtfyPurchaseArm(
 
   const result = await publish(target.base, {
     topic: target.topic,
-    title: `Ready to buy: ${trackerName}`,
+    title: `${L('Ready to buy: ', 'Almaya hazır: ')}${trackerName}`,
     message: `${trackerName} hit ${formatMoney(currentPrice)} (limit ${formatMoney(threshold)}).`,
     priority: 4,
     tags: ['shopping_cart'],
@@ -298,7 +299,7 @@ export async function testNtfyWebhook(
 
   const result = await publish(target.base, {
     topic: target.topic,
-    title: 'Price Tracker - Test Notification',
+    title: L('Price Tracker - Test Notification', 'Fiyat Takip - Test Bildirimi'),
     message: 'ntfy is wired up and working correctly.',
     priority: 3,
     tags: ['white_check_mark'],
