@@ -14,6 +14,9 @@ export interface Tracker {
   name: string;
   url: string;
   normalized_url: string | null;
+  image_url?: string | null;
+  dash_group?: number;
+  dash_order?: number;
   threshold_price: number | null;
   check_interval_minutes: number;
   // Fixed per-tracker random offset (minutes) added to check_interval when
@@ -2145,4 +2148,23 @@ export function getCampaignDailyHistory(
     GROUP BY DATE(ph.scraped_at, '+3 hours')
     ORDER BY date ASC
   `).all(trackerId) as Array<{ date: string; price: number; listPrice: number | null }>;
+}
+
+/** Remember the first product image we see for a tracker (dashboard thumbnail). */
+export function setTrackerImageIfMissing(trackerId: number, imageUrl: string | null | undefined): void {
+  if (!imageUrl) return;
+  getDb()
+    .prepare('UPDATE trackers SET image_url = ? WHERE id = ? AND (image_url IS NULL OR image_url = \'\')')
+    .run(imageUrl.slice(0, 1000), trackerId);
+}
+
+/** Save the user's drag-and-drop dashboard layout (only their own trackers). */
+export function saveDashboardLayout(userId: number, items: { id: number; group: number; order: number }[]): number {
+  const db = getDb();
+  const stmt = db.prepare('UPDATE trackers SET dash_group = ?, dash_order = ? WHERE id = ? AND user_id = ?');
+  let changed = 0;
+  db.transaction(() => {
+    for (const it of items) changed += stmt.run(it.group, it.order, it.id, userId).changes;
+  })();
+  return changed;
 }

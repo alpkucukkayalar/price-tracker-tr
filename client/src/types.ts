@@ -8,6 +8,9 @@ export interface Tracker {
   name: string;
   url: string;
   normalized_url: string | null;
+  image_url?: string | null;
+  dash_group?: number;
+  dash_order?: number;
   threshold_price: number | null;
   check_interval_minutes: number;
   css_selector: string | null;

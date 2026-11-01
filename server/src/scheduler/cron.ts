@@ -16,8 +16,7 @@ import {
   getSellersWithPendingConfirmation,
   getActiveProjectIdsForTracker,
   getActiveWebPushSubscriptionsForUser,
-  getDailyMinHistoryForTracker,
-} from '../db/queries.js';
+  getDailyMinHistoryForTracker, setTrackerImageIfMissing } from '../db/queries.js';
 import {
   computePriceStats,
   evaluateLowTier,
@@ -429,6 +428,7 @@ export async function checkTrackerUrl(
       const priorDailyMins = getDailyMinHistoryForTracker(tracker.id);
 
       addPriceRecord(tracker.id, result.price, result.currency, seller.id, result.listPrice ?? null);
+      setTrackerImageIfMissing(tracker.id, result.imageUrl);
 
       // A successfully priced page is an in-stock signal (phase 4). The
       // prior state decides whether this scrape is a restock transition;

@@ -3,10 +3,10 @@ import { isErrored } from './dashboard-sort'
 import { t } from './i18n'
 
 export type DashboardFilter = 'all' | 'active' | 'below-target' | 'errors' | 'blocked' | 'paused' | 'purchased'
-export type DashboardSortMode = 'smart' | 'price' | 'recent' | 'alpha'
+export type DashboardSortMode = 'smart' | 'manual' | 'price' | 'recent' | 'alpha'
 
 const FILTERS: DashboardFilter[] = ['all', 'active', 'below-target', 'errors', 'blocked', 'paused', 'purchased']
-const SORTS: DashboardSortMode[] = ['smart', 'price', 'recent', 'alpha']
+const SORTS: DashboardSortMode[] = ['smart', 'manual', 'price', 'recent', 'alpha']
 
 // Shared human-readable labels — used by both the toolbar chips and the
 // Dashboard empty state, so a filter name only has one spelling in the UI.
@@ -60,6 +60,9 @@ export function filterCounts(trackers: Tracker[]): Record<DashboardFilter, numbe
 
 export function sortTrackers(trackers: Tracker[], mode: DashboardSortMode): Tracker[] {
   if (mode === 'smart') return trackers
+  if (mode === 'manual') {
+    return [...trackers].sort((a, b) => (a.dash_group ?? 0) - (b.dash_group ?? 0) || (a.dash_order ?? 0) - (b.dash_order ?? 0))
+  }
   const copy = [...trackers]
   switch (mode) {
     case 'price':

@@ -1,3 +1,6 @@
+import GroupedBoard from '../components/GroupedBoard'
+import { TrackerTile, TrackerRow } from '../components/TrackerCompact'
+import { LayoutGrid, Grid3x3, List } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Plus, Package, RefreshCw } from 'lucide-react'
@@ -14,10 +17,29 @@ import { buildDashboardLayout, isErrored, isBelowTarget } from '../lib/dashboard
 import { parseFilter, parseSort, filterTrackers, filterCounts, sortTrackers, FILTER_LABELS } from '../lib/dashboard-filter'
 import { t, pl, tl } from '../lib/i18n'
 
+type DashboardView = 'cards' | 'tiles' | 'list'
+const VIEW_OPTIONS: { id: DashboardView; label: string; icon: typeof LayoutGrid }[] = [
+  { id: 'cards', label: tl('Cards', 'Kart'), icon: LayoutGrid },
+  { id: 'tiles', label: tl('Icons', 'Küçük simge'), icon: Grid3x3 },
+  { id: 'list', label: tl('List', 'Liste'), icon: List },
+]
+
 export default function Dashboard() {
   const [trackers, setTrackers] = useState<Tracker[]>([])
   const [stats, setStats] = useState<Record<string, TrackerStat>>({})
   const [notificationsConfigured, setNotificationsConfigured] = useState(true)
+  const [view, setView] = useState<DashboardView>(() => {
+    try {
+      const v = localStorage.getItem('dashboard-view')
+      return v === 'tiles' || v === 'list' ? v : 'cards'
+    } catch {
+      return 'cards'
+    }
+  })
+  const changeView = (v: DashboardView) => {
+    setView(v)
+    try { localStorage.setItem('dashboard-view', v) } catch { /* private mode */ }
+  }
   const [overlapCounts, setOverlapCounts] = useState<Record<number, number>>({})
   const [loading, setLoading] = useState(true)
   const [searchParams, setSearchParams] = useSearchParams()
@@ -29,7 +51,9 @@ export default function Dashboard() {
   // bookmarkable and survives a page refresh. Search text stays local
   // component state — it's transient, not something you'd want to link to.
   const filter = parseFilter(searchParams.get('filter'))
-  const sort = parseSort(searchParams.get('sort'))
+  const sort = searchParams.get('sort') !== null
+    ? parseSort(searchParams.get('sort'))
+    : (() => { try { return localStorage.getItem('dashboard-sort') === 'manual' ? 'manual' as const : 'smart' as const } catch { return 'smart' as const } })()
   useTitle(filter === 'all' ? t('Dashboard') : `Dashboard — ${FILTER_LABELS[filter]}`)
 
   const setParam = (key: 'filter' | 'sort', value: string, defaultValue: string) => {
@@ -129,6 +153,8 @@ export default function Dashboard() {
     ? buildDashboardLayout(visibleTrackers).items
     : visibleTrackers.map(tracker => ({ kind: 'tracker' as const, tracker }))
 
+  const flatTrackers = items.flatMap(item => (item.kind === 'tracker' ? [item.tracker] : item.trackers))
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -158,7 +184,7 @@ export default function Dashboard() {
         query={query}
         onQueryChange={setQuery}
         onFilterChange={f => setParam('filter', f, 'all')}
-        onSortChange={s => setParam('sort', s, 'smart')}
+        onSortChange={s => { try { localStorage.setItem('dashboard-sort', s) } catch { /* private mode */ } setParam('sort', s, 'smart') }}
       />
 
       {filter === 'errors' && counts.errors > 0 && (
@@ -181,12 +207,66 @@ export default function Dashboard() {
 
       <StatCards trackers={trackers} counts={counts} onSelectFilter={f => setParam('filter', f, 'all')} />
 
-      {items.length === 0 ? (
+      <div className="flex justify-end mb-3">
+        <div className="inline-flex rounded-lg border border-border overflow-hidden" role="group">
+          {VIEW_OPTIONS.map(v => (
+            <button
+              key={v.id}
+              onClick={() => changeView(v.id)}
+              title={v.label}
+              aria-pressed={view === v.id}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${view === v.id ? 'bg-primary text-white' : 'bg-surface text-text-muted hover:text-text'}`}
+            >
+              <v.icon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{v.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {sort === 'manual' && items.length > 0 ? (
+        <GroupedBoard
+          trackers={flatTrackers}
+          view={view}
+          renderItem={tr =>
+            view === 'tiles' ? (
+              <TrackerTile tracker={tr} minPrice={stats[tr.id]?.min_price ?? null} />
+            ) : view === 'list' ? (
+              <TrackerRow tracker={tr} minPrice={stats[tr.id]?.min_price ?? null} />
+            ) : (
+              <TrackerCard
+                tracker={tr}
+                sparklineData={stats[tr.id]?.sparkline || []}
+                minPrice={stats[tr.id]?.min_price ?? null}
+                onUpdate={load}
+                notificationsConfigured={notificationsConfigured}
+                overlapCount={overlapCounts[tr.id] ?? 0}
+                isPurchased={tr.status === 'purchased'}
+                glow={isBelowTarget(tr)}
+              />
+            )
+          }
+        />
+      ) : items.length > 0 && view !== 'cards' ? (
+        view === 'tiles' ? (
+          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))' }}>
+            {flatTrackers.map(tr => (
+              <TrackerTile key={tr.id} tracker={tr} minPrice={stats[tr.id]?.min_price ?? null} />
+            ))}
+          </div>
+        ) : (
+          <div className="bg-surface border border-border rounded-xl divide-y divide-border overflow-hidden">
+            {flatTrackers.map(tr => (
+              <TrackerRow key={tr.id} tracker={tr} minPrice={stats[tr.id]?.min_price ?? null} />
+            ))}
+          </div>
+        )
+      ) : items.length === 0 ? (
         <div className="flex items-center justify-center h-40 text-text-muted text-sm">
           {t('No trackers match this filter —')} {FILTER_LABELS[filter]}.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 320px), 1fr))' }}>
           {items.map(item =>
             item.kind === 'tracker' ? (
               <TrackerCard

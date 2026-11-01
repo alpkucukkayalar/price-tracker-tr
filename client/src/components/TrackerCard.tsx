@@ -1,3 +1,4 @@
+import ProductThumb from './ProductThumb'
 import { Link } from 'react-router-dom'
 import { ExternalLink, Clock, RefreshCw, BellOff, TrendingDown, Store, Users, Zap } from 'lucide-react'
 import type { Tracker } from '../types'
@@ -104,7 +105,8 @@ export default function TrackerCard({ tracker, sparklineData, minPrice = null, o
       to={`/tracker/${tracker.id}`}
       className={`group block bg-surface border border-border rounded-xl p-5 hover:border-primary/50 hover:shadow-[0_0_20px_rgba(99,102,241,0.08)] transition-all no-underline ${isPurchased ? 'opacity-60' : ''}${glow ? ' bit-border-glow' : ''}`}
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <ProductThumb url={tracker.image_url} size={56} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
             <h3 className="text-text font-semibold text-base truncate">{tracker.name}</h3>

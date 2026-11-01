@@ -6,6 +6,7 @@ import { extractFromCssPatterns, isAmazonCurrentlyUnavailable } from './strategi
 import { extractFromRegex } from './strategies/regex.js';
 import { extractWithCssSelector } from './strategies/css-selector.js';
 import { extractProductTitle } from './strategies/product-title.js';
+import { extractProductImage } from './strategies/product-image.js';
 import { extractAvailability } from './strategies/availability.js';
 import { withRetry, ScrapeError } from './retry.js';
 import { config } from '../config.js';
@@ -35,6 +36,8 @@ export interface ExtractionResult {
    * campaign analysis can compare the CLAIMED discount with the real one.
    */
   listPrice?: number | null;
+  /** Product image (og:image / JSON-LD / Amazon landing image) for thumbnails. */
+  imageUrl?: string | null;
 }
 
 /**
@@ -270,6 +273,7 @@ export async function extractPrice(url: string, cssSelector?: string | null): Pr
         strategy: tr.source,
         finalUrl,
         title: extractProductTitle(html),
+        imageUrl: extractProductImage(html, finalUrl),
         listPrice: tr.listPrice,
       };
     }
@@ -303,6 +307,7 @@ export async function extractPrice(url: string, cssSelector?: string | null): Pr
         strategy: name,
         finalUrl,
         title: extractProductTitle(html),
+        imageUrl: extractProductImage(html, finalUrl),
         listPrice: trRetailer ? extractTurkishListPrice(html, trRetailer, price) : undefined,
       };
     }
