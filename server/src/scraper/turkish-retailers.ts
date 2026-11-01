@@ -265,3 +265,20 @@ export function extractTurkishListPrice(html: string, retailer: TurkishRetailer,
       : extractTurkishRetailerPrice(html, retailer)?.listPrice ?? null;
   return sanitizeList(price, list);
 }
+
+/**
+ * Amazon.com.tr links pasted from Google Shopping / ads carry
+ * `/ref=asc_df_…?tag=…&hvadid=…` noise. Store the plain product URL
+ * (https://www.amazon.com.tr/dp/<ASIN>) instead; other URLs pass through.
+ */
+export function cleanProductUrl(url: string): string {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    return url;
+  }
+  if (detectTurkishRetailer(url) !== 'amazon_tr') return url;
+  const asin = /\/(?:dp|gp\/product|gp\/aw\/d)\/([A-Z0-9]{10})(?:[/?]|$)/i.exec(u.pathname + '/');
+  return asin ? `https://www.amazon.com.tr/dp/${asin[1].toUpperCase()}` : url;
+}

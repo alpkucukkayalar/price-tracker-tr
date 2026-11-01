@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parsePrice } from './extractor.js';
 import {
+  cleanProductUrl,
   extractAmazonTr,
   detectTurkishRetailer,
   isTurkishHost,
@@ -178,5 +179,18 @@ describe('extractAmazonTr', () => {
   });
   it('returns null without a core price box', () => {
     expect(extractAmazonTr('<html><body><span class="a-offscreen">99,00TL</span></body></html>')).toBeNull();
+  });
+});
+
+describe('cleanProductUrl', () => {
+  it('strips Google Shopping / ad noise from Amazon.com.tr links', () => {
+    expect(cleanProductUrl('https://www.amazon.com.tr/Aqara-Sensor/dp/B0G12F8K4D/ref=asc_df_B0G12F8K4D?tag=trshpngglede-21&linkCode=df0&hvadid=1&gad_source=4'))
+      .toBe('https://www.amazon.com.tr/dp/B0G12F8K4D');
+    expect(cleanProductUrl('https://amazon.com.tr/gp/product/b0fvxm4x4j?psc=1')).toBe('https://www.amazon.com.tr/dp/B0FVXM4X4J');
+  });
+  it('leaves other URLs alone', () => {
+    expect(cleanProductUrl('https://www.trendyol.com/x/y-p-1?boutiqueId=2')).toBe('https://www.trendyol.com/x/y-p-1?boutiqueId=2');
+    expect(cleanProductUrl('https://www.amazon.com/dp/B0ABCDEFGH/ref=x')).toBe('https://www.amazon.com/dp/B0ABCDEFGH/ref=x');
+    expect(cleanProductUrl('not a url')).toBe('not a url');
   });
 });
