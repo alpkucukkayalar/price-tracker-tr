@@ -1,25 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
   <meta charset="utf-8">
-  <title>Price Tracker — Options</title>
+  <title>Fiyat Takip — Ayarlar</title>
   <link rel="stylesheet" href="options.css">
 </head>
 <body>
   <main>
-    <h1>Price Tracker</h1>
+    <h1>Fiyat Takip</h1>
+
+    <label for="server">Uygulamanın adresi</label>
+    <input id="server" type="text" placeholder="http://localhost:3100" autocomplete="off">
+    <p class="muted">Kendi bilgisayarındaysa <code>http://localhost:3100</code> kalsın.</p>
+
+    <label for="token">API anahtarı</label>
+    <input id="token" type="password" placeholder="pt_…" autocomplete="off">
     <p class="muted">
-      Paste an API token from
-      <a href="https://prices.schultzsolutions.tech/settings" target="_blank">Settings → Connected Apps</a>.
+      Anahtarı uygulamada
+      <a id="settings-link" href="http://localhost:3100/settings" target="_blank">Ayarlar → Bağlı Uygulamalar</a>
+      bölümünden üretip buraya yapıştır.
     </p>
 
-    <label>API token</label>
-    <input id="token" type="password" placeholder="pt_…" autocomplete="off">
-
     <div class="row">
-      <button id="save">Save</button>
-      <button id="test">Test connection</button>
-      <button id="clear" class="ghost">Clear</button>
+      <button id="save">Kaydet</button>
+      <button id="test">Bağlantıyı dene</button>
+      <button id="clear" class="ghost">Anahtarı sil</button>
     </div>
 
     <div id="status" class="status"></div>

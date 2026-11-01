@@ -22,7 +22,7 @@ import type { Tracker } from '../types/api.js';
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'add-to-price-tracker',
-    title: 'Add to Price Tracker',
+    title: "Fiyat Takip'e ekle",
     contexts: ['page', 'link'],
     documentUrlPatterns: ['<all_urls>'],
   });

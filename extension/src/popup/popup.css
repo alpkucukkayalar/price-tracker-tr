@@ -185,3 +185,7 @@ button.ghost, .ghost-button {
   margin: 0 auto 8px;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.bulk-footer { padding: 8px 12px 12px; border-top: 1px solid rgba(127,127,127,.2); }
+.bulk-footer .ghost-button { width: 100%; }
+.bulk-footer .hidden { display: none; }

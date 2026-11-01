@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Search, Loader2, CheckCircle } from 'lucide-react'
 import { createTracker, testScrape, getTrackerUrls, updateTrackerUrlCondition } from '../api'
 import type { ScrapeResult, TrackerUrlCondition } from '../types'
 import useTitle from '../useTitle'
 import { formatMoney } from '../lib/money'
-import { t } from '../lib/i18n'
+import { t, tl } from '../lib/i18n'
 
 export default function AddTracker() {
   useTitle(t('Add Tracker'))
@@ -97,7 +97,12 @@ export default function AddTracker() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">{t('Add Tracker')}</h1>
+      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-6">
+        <h1 className="text-2xl font-bold">{t('Add Tracker')}</h1>
+        <Link to="/ice-aktar" className="text-sm text-primary underline">
+          {tl('Many links? Bulk import →', 'Çok link mi var? Toplu içe aktar →')}
+        </Link>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-text-muted mb-1.5">{t('Product URL')}</label>

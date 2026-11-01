@@ -40,6 +40,7 @@ const WishlistPublic = lazy(() => import('./pages/WishlistPublic'))
 // Everything else is lazy. Each of these becomes its own chunk that
 // the browser only fetches when the user actually navigates there.
 const AddTracker = lazy(() => import('./pages/AddTracker'))
+const ImportLinks = lazy(() => import('./pages/ImportLinks'))
 const TrackerDetail = lazy(() => import('./pages/TrackerDetail'))
 const Category = lazy(() => import('./pages/Category'))
 const Notifications = lazy(() => import('./pages/Notifications'))
@@ -208,6 +209,7 @@ function App() {
           <Routes>
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/add" element={<ProtectedRoute><AddTracker /></ProtectedRoute>} />
+            <Route path="/ice-aktar" element={<ProtectedRoute><ImportLinks /></ProtectedRoute>} />
             <Route path="/share" element={<ProtectedRoute><Share /></ProtectedRoute>} />
             <Route path="/tracker/:id" element={<ProtectedRoute><TrackerDetail /></ProtectedRoute>} />
             <Route path="/category/:domain" element={<ProtectedRoute><Category /></ProtectedRoute>} />

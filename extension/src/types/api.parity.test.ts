@@ -38,6 +38,10 @@ const SERVER_QUERIES_TS = resolve(__dirname, '../../../server/src/db/queries.ts'
  * parity test forces the extension's Tracker to mirror that field.
  */
 const IGNORED_SERVER_FIELDS = new Set<string>([
+  // Dashboard-only presentation: thumbnail + drag-and-drop group/order.
+  'image_url',
+  'dash_group',
+  'dash_order',
   // Internal scheduler state — not useful for "add or check" popup flow.
   'jitter_minutes',
   'check_interval_minutes', // present in extension too, but listed here for clarity

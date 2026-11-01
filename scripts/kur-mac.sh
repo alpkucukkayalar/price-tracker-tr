@@ -10,6 +10,7 @@
 #   2. Uygulamayı ~/fiyat-takip/app altına indirir ve derler
 #   3. Rastgele gizli anahtarlarla ~/fiyat-takip/.env oluşturur (varsa dokunmaz)
 #   4. launchd ile oturum açılınca otomatik başlatır, çökerse yeniden başlatır
+#   (Masaüstü/İndirilenler'de fiyat-takip-tasima.zip varsa Windows verilerini alır)
 #   5. Uygulama çalışırken Mac'in uykuya geçmesini engeller (caffeinate)
 #   6. Tarayıcıda http://localhost:3100 açar
 #
@@ -61,6 +62,37 @@ step "Bağımlılıklar ve derleme (5-10 dakika sürebilir)"
 ( cd "$APP/server" && npm ci --no-audit --no-fund && npx playwright install chromium chromium-headless-shell && npm run build )
 ( cd "$APP/client" && npm ci --no-audit --no-fund && VITE_DISPLAY_CURRENCY=TRY npm run build )
 
+# --- 3b. Windows'tan taşıma (isteğe bağlı) -----------------------------------------------
+# İndirilenler ya da Masaüstü'nde fiyat-takip-tasima.zip varsa ve Mac'te henüz
+# veri yoksa: veritabanını alır, gizli anahtarları (JWT_SECRET,
+# SETTINGS_ENCRYPTION_KEY) eski .env'den taşır. Böylece hesabın, ürünlerin ve
+# şifreli ayarların aynen gelir. Zip düzeni: .env + data/price-tracker.db
+TASIMA=""
+for f in "${TASIMA_ZIP:-}" "$HOME/Downloads/fiyat-takip-tasima.zip" "$HOME/Desktop/fiyat-takip-tasima.zip"; do
+  [ -n "$f" ] && [ -f "$f" ] && { TASIMA="$f"; break; }
+done
+if [ -n "$TASIMA" ] && [ ! -f "$DATA/price-tracker.db" ]; then
+  step "Windows verileri taşınıyor ($TASIMA)"
+  T="$(mktemp -d)"
+  unzip -q -o "$TASIMA" -d "$T"
+  DB_SRC="$(find "$T" -name price-tracker.db -type f | head -1)"
+  OLD_ENV="$(find "$T" -name .env -type f | head -1)"
+  if [ -n "$DB_SRC" ] && [ -n "$OLD_ENV" ]; then
+    cp "$DB_SRC" "$DATA/price-tracker.db"
+    for x in -wal -shm; do [ -f "$DB_SRC$x" ] && cp "$DB_SRC$x" "$DATA/price-tracker.db$x"; done
+    getv() { grep -E "^$1=" "$OLD_ENV" | tail -1 | cut -d= -f2- | tr -d '\r'; }
+    OLD_JWT="$(getv JWT_SECRET)"; OLD_KEY="$(getv SETTINGS_ENCRYPTION_KEY)"
+    if [ -n "$OLD_JWT" ] && [ -n "$OLD_KEY" ]; then
+      [ -f "$ENV_FILE" ] && mv "$ENV_FILE" "$ENV_FILE.onceki"
+      export OLD_JWT OLD_KEY
+    fi
+    echo "Veritabanı ve anahtarlar alındı."
+  else
+    echo "UYARI: Zip içinde .env ya da price-tracker.db bulunamadı; temiz kurulum yapılıyor."
+  fi
+  rm -rf "$T"
+fi
+
 # --- 4. .env ----------------------------------------------------------------------------
 if [ ! -f "$ENV_FILE" ]; then
   step ".env oluşturuluyor"
@@ -70,8 +102,8 @@ PORT=$PORT
 DATABASE_PATH=$DATA/price-tracker.db
 NODE_ENV=production
 COOKIE_SECURE=false
-JWT_SECRET=$(rand)
-SETTINGS_ENCRYPTION_KEY=$(rand)
+JWT_SECRET=${OLD_JWT:-$(rand)}
+SETTINGS_ENCRYPTION_KEY=${OLD_KEY:-$(rand)}
 PUBLIC_URL=http://localhost:$PORT
 DISPLAY_CURRENCY=TRY
 CAMPAIGN_NAME=Efsane Cuma / Black Friday 2026
