@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
   <meta charset="utf-8">
   <link rel="stylesheet" href="popup.css">
@@ -8,74 +8,74 @@
   <div id="root"></div>
 
   <template id="tpl-form">
-    <div class="header"><strong>Add to Price Tracker</strong><span class="host"></span></div>
+    <div class="header"><strong>Fiyat Takip'e ekle</strong><span class="host"></span></div>
     <div class="body">
-      <label>Name</label>
+      <label>Ürün adı</label>
       <input data-field="name" type="text" />
 
       <label>URL</label>
       <input data-field="url" type="text" readonly />
 
-      <label>Threshold price (optional)</label>
-      <input data-field="threshold" type="text" placeholder="$0.00" />
+      <label>Hedef fiyat (isteğe bağlı)</label>
+      <input data-field="threshold" type="text" placeholder="ör. 1.299,90" />
 
       <details class="advanced">
-        <summary>Advanced</summary>
-        <label>CSS selector (optional)</label>
+        <summary>Gelişmiş</summary>
+        <label>CSS seçici (isteğe bağlı)</label>
         <input data-field="css" type="text" />
         <button data-action="pick-element" type="button" class="ghost-button" style="margin-top: 4px;">
-          Pick price element on this page
+          Sayfada fiyatı tıklayarak seç
         </button>
         <div data-pick-status class="muted small hidden" style="margin-top: 4px;"></div>
-        <label>Check interval (minutes)</label>
+        <label>Kontrol aralığı (dakika)</label>
         <input data-field="interval" type="number" min="5" placeholder="360" />
       </details>
 
-      <button data-action="add" class="primary">Add Tracker</button>
+      <button data-action="add" class="primary">Takibe ekle</button>
       <div data-error class="error hidden"></div>
     </div>
   </template>
 
   <template id="tpl-no-token">
-    <div class="header"><strong>Set up your API token</strong></div>
+    <div class="header"><strong>API anahtarını ayarla</strong></div>
     <div class="body center">
-      <p>The extension needs an API token from your Price Tracker.</p>
-      <button data-action="open-options" class="primary">Open Settings</button>
+      <p>Eklentinin, Fiyat Takip uygulamandan alınmış bir API anahtarına ihtiyacı var.</p>
+      <button data-action="open-options" class="primary">Ayarları aç</button>
     </div>
   </template>
 
   <template id="tpl-success">
-    <div class="header"><strong>Added ✓</strong></div>
+    <div class="header"><strong>Eklendi ✓</strong></div>
     <div class="body center">
       <div class="check-icon">✓</div>
-      <div class="title">Tracking now</div>
-      <p class="muted">First scrape will run within the next cron tick.</p>
+      <div class="title">Takip ediliyor</div>
+      <p class="muted">İlk fiyat birkaç dakika içinde okunacak.</p>
 
       <!-- Project picker — populated on mount, hidden if no projects -->
       <div data-add-to-project class="hidden project-picker">
-        <label class="project-picker-label">Add to bundle (optional)</label>
+        <label class="project-picker-label">Projeye ekle (isteğe bağlı)</label>
         <select data-project-select class="project-picker-select">
-          <option value="">— None —</option>
+          <option value="">— Yok —</option>
         </select>
-        <button data-add-project class="ghost-button project-picker-button">Add to bundle</button>
+        <button data-add-project class="ghost-button project-picker-button">Projeye ekle</button>
       </div>
 
-      <a data-link class="ghost-button" target="_blank">View tracker →</a>
-      <div class="muted small">closes in 2s…</div>
+      <a data-link class="ghost-button" target="_blank">Ürünü aç →</a>
+      <div class="muted small">2 sn içinde kapanır…</div>
     </div>
   </template>
 
   <template id="tpl-error">
-    <div class="header"><strong>Couldn't add tracker</strong></div>
+    <div class="header"><strong>Eklenemedi</strong></div>
     <div class="body">
       <p data-msg></p>
-      <button data-action="retry" class="primary">Retry</button>
-      <button data-action="open-options" class="ghost">Open Settings</button>
+      <button data-action="retry" class="primary">Tekrar dene</button>
+      <button data-action="open-options" class="ghost">Ayarları aç</button>
     </div>
   </template>
 
   <template id="tpl-dup">
-    <div class="header"><strong>Already tracking</strong><span class="host"></span></div>
+    <div class="header"><strong>Zaten takipte</strong><span class="host"></span></div>
     <div class="body">
       <div class="muted small" data-name></div>
       <div class="last-price">
@@ -86,16 +86,16 @@
 
       <!-- Threshold edit affordance -->
       <div class="threshold-row">
-        <span class="threshold-label">Threshold</span>
+        <span class="threshold-label">Hedef fiyat</span>
         <span data-threshold-display class="threshold-display">—</span>
-        <button data-edit-threshold class="threshold-edit-btn">Edit</button>
+        <button data-edit-threshold class="threshold-edit-btn">Düzenle</button>
       </div>
       <div data-threshold-edit class="hidden threshold-edit-row">
-        <input data-threshold-input type="text" placeholder="$0.00" class="threshold-input" />
-        <button data-save-threshold class="threshold-save-btn">Save</button>
+        <input data-threshold-input type="text" placeholder="ör. 1.299,90" class="threshold-input" />
+        <button data-save-threshold class="threshold-save-btn">Kaydet</button>
       </div>
 
-      <a data-link class="ghost-button" target="_blank">Open in Price Tracker →</a>
+      <a data-link class="ghost-button" target="_blank">Fiyat Takip'te aç →</a>
     </div>
   </template>
 
@@ -103,7 +103,7 @@
     <div class="header"><strong>Price Tracker</strong></div>
     <div class="body center loading">
       <div class="spinner"></div>
-      <p class="muted small">Checking…</p>
+      <p class="muted small">Kontrol ediliyor…</p>
     </div>
   </template>
 
@@ -113,12 +113,19 @@
        hostname). Distinct from tpl-error because there's nothing to
        retry; the user just needs to navigate to a real product URL. -->
   <template id="tpl-unsupported">
-    <div class="header"><strong>Can't track this page</strong></div>
+    <div class="header"><strong>Bu sayfa takip edilemez</strong></div>
     <div class="body">
       <p class="muted" data-msg></p>
-      <p class="muted small">Open a product page on a retailer site (Amazon, Newegg, etc.) and click the extension again.</p>
+      <p class="muted small">Bir mağazada (Trendyol, Amazon, Hepsiburada, Akakçe…) ürün sayfasını açıp eklentiye tekrar tıkla.</p>
     </div>
   </template>
+
+  <!-- Always-visible footer: send every product link on this page (e.g. a
+       favourites list) to the app's bulk import page. -->
+  <div class="bulk-footer">
+    <button id="bulk-send" type="button" class="ghost-button">Bu sayfadaki tüm ürünleri toplu aktar</button>
+    <div id="bulk-status" class="muted small hidden"></div>
+  </div>
 
   <script type="module" src="popup.ts"></script>
 </body>

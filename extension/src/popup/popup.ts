@@ -1,4 +1,5 @@
-import { getStoredToken } from '../lib/api.js';
+import { getServerUrl, getStoredToken } from '../lib/api.js';
+import { PRODUCT_PATTERN_SOURCES, collectProductLinks, importPageUrl } from '../lib/product-links.js';
 import { unsupportedReason, blockedRetailerReason } from '../lib/url-guard.js';
 import type {
   ExtensionResponse,
@@ -36,7 +37,7 @@ async function main() {
   if (!token) { renderNoToken(); return; }
 
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.url) { renderError('Could not read the active tab.'); return; }
+  if (!tab?.url) { renderError('Açık sekme okunamadı.'); return; }
 
   // Guard non-product URLs (chrome://, about:, file://, javascript:, and
   // URLs whose "hostname" isn't a real DNS name like `chrome://settings`
@@ -62,7 +63,7 @@ async function main() {
   } satisfies CheckDupMessage);
 
   if (dup.ok && 'exists' in dup && dup.exists && dup.tracker) {
-    renderDup(dup.tracker);
+    void renderDup(dup.tracker);
     return;
   }
 
@@ -114,8 +115,8 @@ async function renderForm(url: string, title: string) {
       if ($pickStatus) {
         $pickStatus.classList.remove('hidden');
         $pickStatus.textContent = picked.matchedText
-          ? `Picked from page — matched "${picked.matchedText}"`
-          : `Picked from page — no price-shape match, double-check`;
+          ? `Sayfadan seçildi — eşleşen: "${picked.matchedText}"`
+          : `Sayfadan seçildi — fiyata benzemiyor, kontrol et`;
       }
       // One-shot: consume the picked selector so it doesn't auto-fill on
       // subsequent reopens. User can re-pick if they want a different one.
@@ -142,8 +143,8 @@ async function renderForm(url: string, title: string) {
         if ($pickStatus) {
           $pickStatus.classList.remove('hidden');
           $pickStatus.textContent = resp.detail
-            ? `Couldn't start picker: ${resp.detail}`
-            : `Couldn't start picker.`;
+            ? `Seçici başlatılamadı: ${resp.detail}`
+            : `Seçici başlatılamadı.`;
         }
       }
     });
@@ -160,7 +161,7 @@ async function renderForm(url: string, title: string) {
       css_selector: $css.value.trim() || null,
       check_interval_minutes: parseInterval($interval.value),
     };
-    if (!payload.name) { showError($error, 'Name is required.'); return; }
+    if (!payload.name) { showError($error, 'Ürün adı gerekli.'); return; }
     const msg: CreateMessage = { type: 'CREATE', payload };
     const resp = await chrome.runtime.sendMessage(msg) as ExtensionResponse;
     if (resp.ok && 'tracker' in resp && resp.tracker) {
@@ -171,13 +172,13 @@ async function renderForm(url: string, title: string) {
   });
 }
 
-function renderDup(tracker: Tracker) {
+async function renderDup(tracker: Tracker) {
   swap('tpl-dup');
   const host = root.querySelector('.host')!;
   host.textContent = formatHost(tracker.url);
   (root.querySelector('[data-name]') as HTMLElement).textContent = tracker.name;
   (root.querySelector('[data-price]') as HTMLElement).textContent =
-    tracker.last_price !== null ? `$${tracker.last_price.toFixed(2)}` : '—';
+    tracker.last_price !== null ? fmtTL(tracker.last_price) : '—';
   if (tracker.ai_verdict_tier) {
     const pill = root.querySelector('[data-verdict]') as HTMLElement;
     pill.textContent = tracker.ai_verdict_tier;
@@ -187,7 +188,7 @@ function renderDup(tracker: Tracker) {
   (root.querySelector('[data-reason]') as HTMLElement).textContent =
     tracker.ai_verdict_reason ?? '';
   (root.querySelector('[data-link]') as HTMLAnchorElement).href =
-    `https://prices.schultzsolutions.tech/tracker/${tracker.id}`;
+    `${await getServerUrl()}/tracker/${tracker.id}`;
 
   // Threshold display + inline edit
   const thresholdDisplay = root.querySelector('[data-threshold-display]') as HTMLElement;
@@ -197,7 +198,7 @@ function renderDup(tracker: Tracker) {
   const saveBtn = root.querySelector('[data-save-threshold]') as HTMLButtonElement;
 
   function fmtThreshold(v: number | null): string {
-    return v !== null ? `$${v.toFixed(2)}` : 'not set';
+    return v !== null ? fmtTL(v) : 'yok';
   }
   thresholdDisplay.textContent = fmtThreshold(tracker.threshold_price);
   input.value = tracker.threshold_price !== null ? String(tracker.threshold_price) : '';
@@ -210,15 +211,15 @@ function renderDup(tracker: Tracker) {
   });
 
   saveBtn.addEventListener('click', async () => {
-    const raw = input.value.trim().replace(/[$,\s]/g, '');
+    const raw = input.value.trim();
     let next: number | null;
     if (raw === '') {
       next = null;
     } else {
-      const n = Number(raw);
+      const n = parseMoney(raw);
       if (!Number.isFinite(n) || n <= 0) {
-        saveBtn.textContent = 'Invalid';
-        setTimeout(() => { saveBtn.textContent = 'Save'; }, 1500);
+        saveBtn.textContent = 'Geçersiz';
+        setTimeout(() => { saveBtn.textContent = 'Kaydet'; }, 1500);
         return;
       }
       next = n;
@@ -235,10 +236,10 @@ function renderDup(tracker: Tracker) {
       editRow.classList.add('hidden');
       editBtn.style.display = '';
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Save';
+      saveBtn.textContent = 'Kaydet';
     } else {
       saveBtn.disabled = false;
-      saveBtn.textContent = 'Retry';
+      saveBtn.textContent = 'Tekrar dene';
     }
   });
 }
@@ -246,7 +247,7 @@ function renderDup(tracker: Tracker) {
 async function renderSuccess(trackerId: number) {
   swap('tpl-success');
   const link = root.querySelector('[data-link]') as HTMLAnchorElement;
-  link.href = `https://prices.schultzsolutions.tech/tracker/${trackerId}`;
+  link.href = `${await getServerUrl()}/tracker/${trackerId}`;
 
   let userInteracted = false;
   const projectsContainer = root.querySelector('[data-add-to-project]') as HTMLDivElement;
@@ -283,18 +284,18 @@ async function renderSuccess(trackerId: number) {
       const projectId = Number(select.value);
       if (!projectId) return;
       addBtn.disabled = true;
-      addBtn.textContent = 'Adding...';
+      addBtn.textContent = 'Ekleniyor...';
       const result = await chrome.runtime.sendMessage({
         type: 'ADD_TO_PROJECT',
         project_id: projectId,
         tracker_id: trackerId,
       } satisfies AddToProjectMessage) as ExtensionResponse;
       if (result.ok) {
-        addBtn.textContent = 'Added ✓';
+        addBtn.textContent = 'Eklendi ✓';
         setTimeout(() => window.close(), 1000);
       } else {
         addBtn.disabled = false;
-        addBtn.textContent = 'Retry';
+        addBtn.textContent = 'Tekrar dene';
       }
     });
   }
@@ -317,8 +318,20 @@ function showError(node: HTMLDivElement, msg: string) {
   node.classList.remove('hidden');
 }
 
+function fmtTL(v: number): string {
+  return `${v.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
+}
+
+/** "1.299,90 TL" / "1299.90" / "₺1.299" → number. */
+function parseMoney(s: string): number {
+  let v = s.replace(/[^\d.,]/g, '');
+  if (v.includes(',')) v = v.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(v)) v = v.replace(/\./g, '');
+  return parseFloat(v);
+}
+
 function parseThreshold(s: string): number | null {
-  const n = parseFloat(s.replace(/[$,\s]/g, ''));
+  const n = parseMoney(s);
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
@@ -329,14 +342,14 @@ function parseInterval(s: string): number | undefined {
 
 function errorText(code: ErrorCode, _detail?: string): string {
   switch (code) {
-    case 'NO_TOKEN': return 'Open Settings to paste your API token.';
-    case 'UNAUTHORIZED': return 'Token isn\'t working — re-paste in Settings.';
-    case 'NETWORK': return 'Couldn\'t reach prices.schultzsolutions.tech.';
-    case 'SERVER': return 'Server hiccup — try again, or add manually.';
-    case 'VALIDATION': return 'URL doesn\'t look right or is missing required info.';
-    case 'CONFLICT': return 'Already tracking this URL.';
-    case 'NOT_IMPLEMENTED': return 'This shouldn\'t happen — please report.';
-    case 'UNKNOWN': return 'Something went wrong.';
+    case 'NO_TOKEN': return 'Ayarlar\'ı açıp API anahtarını yapıştır.';
+    case 'UNAUTHORIZED': return 'Anahtar çalışmıyor — Ayarlar\'da yeniden yapıştır.';
+    case 'NETWORK': return 'Fiyat Takip uygulamasına ulaşılamadı. Bilgisayarında açık mı? (Ayarlar\'daki sunucu adresini kontrol et.)';
+    case 'SERVER': return 'Sunucuda sorun oldu — tekrar dene ya da elle ekle.';
+    case 'VALIDATION': return 'Link geçersiz ya da eksik bilgi var.';
+    case 'CONFLICT': return 'Bu ürün zaten takipte.';
+    case 'NOT_IMPLEMENTED': return 'Beklenmeyen durum — lütfen bildir.';
+    case 'UNKNOWN': return 'Bir şeyler ters gitti.';
     default: {
       const _exhaustive: never = code;
       return `Something went wrong${_exhaustive ? '' : ''}.`;
@@ -355,3 +368,26 @@ function formatHost(url: string): string {
 }
 
 main().catch(err => renderError(String(err)));
+
+// ── Bulk send: every product link on the current page (e.g. the user's
+// Akakçe / Hepsiburada favourites, opened in their own logged-in browser)
+// goes to the app's import page, where they pick what to add. ──
+document.getElementById('bulk-send')?.addEventListener('click', async () => {
+  const status = document.getElementById('bulk-status')!;
+  const say = (t: string) => { status.textContent = t; status.classList.remove('hidden'); };
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) { say('Açık sekme okunamadı.'); return; }
+    const [res] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: collectProductLinks,
+      args: [[...PRODUCT_PATTERN_SOURCES]],
+    });
+    const links = (res?.result ?? []) as [string, string][];
+    if (links.length === 0) { say('Bu sayfada ürün linki bulunamadı. Listeyi aşağı kaydırıp tekrar dene.'); return; }
+    await chrome.tabs.create({ url: importPageUrl(await getServerUrl(), links) });
+    window.close();
+  } catch (err) {
+    say(`Bu sayfa okunamadı: ${err instanceof Error ? err.message : String(err)}`);
+  }
+});

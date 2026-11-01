@@ -1,7 +1,31 @@
 import type { Tracker, TrackerCreatePayload } from '../types/api.js';
 import type { ErrorCode } from './messages.js';
 
-const API_ORIGIN = 'https://prices.schultzsolutions.tech';
+/** Where the user's own Fiyat Takip app runs. Changeable in Options. */
+export const DEFAULT_SERVER_URL = 'http://localhost:3100';
+
+/** Normalise user input ("192.168.1.5:3100", trailing slash) to an origin, or null. */
+export function normalizeServerUrl(input: string): string | null {
+  let v = input.trim();
+  if (!v) return null;
+  if (!/^https?:\/\//i.test(v)) v = `http://${v}`;
+  try {
+    const u = new URL(v);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    return u.origin;
+  } catch {
+    return null;
+  }
+}
+
+export async function getServerUrl(): Promise<string> {
+  const data = await chrome.storage.local.get(['serverUrl']);
+  return normalizeServerUrl((data.serverUrl as string | undefined) ?? '') ?? DEFAULT_SERVER_URL;
+}
+
+export async function setServerUrl(url: string): Promise<void> {
+  await chrome.storage.local.set({ serverUrl: url });
+}
 
 export async function getStoredToken(): Promise<string | null> {
   const data = await chrome.storage.local.get(['apiToken']);
@@ -32,7 +56,7 @@ async function request<T>(path: string, init: RequestInit & { method: string }):
 
   let response: Response;
   try {
-    response = await fetch(`${API_ORIGIN}${path}`, {
+    response = await fetch(`${await getServerUrl()}${path}`, {
       ...init,
       headers: {
         ...(init.headers ?? {}),
