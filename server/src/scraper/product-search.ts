@@ -8,11 +8,13 @@
  * price is the first TL-marked number after the link.
  */
 import { parsePrice } from './extractor.js';
-import { detectTurkishRetailer, type TurkishRetailer } from './turkish-retailers.js';
+import { detectTurkishRetailer, isTurkishAggregator, type TurkishRetailer } from './turkish-retailers.js';
 
-export type SearchRetailer = Exclude<TurkishRetailer, 'hepsiburada'>;
+export type SearchRetailer = Exclude<TurkishRetailer, 'hepsiburada'> | 'akakce';
 
-export const SEARCHABLE_RETAILERS: SearchRetailer[] = ['trendyol', 'amazon_tr', 'n11'];
+// Akakçe first: one product page there carries every store's lowest price,
+// including stores that block us directly (Hepsiburada, sometimes Amazon).
+export const SEARCHABLE_RETAILERS: SearchRetailer[] = ['akakce', 'trendyol', 'amazon_tr', 'n11'];
 
 export interface SearchCandidate {
   retailer: SearchRetailer;
@@ -32,6 +34,8 @@ export function buildSearchUrl(retailer: SearchRetailer, query: string): string 
       return `https://www.amazon.com.tr/s?k=${q}`;
     case 'n11':
       return `https://www.n11.com/arama?q=${q}`;
+    case 'akakce':
+      return `https://www.akakce.com/arama/?q=${q}`;
   }
 }
 
@@ -101,6 +105,11 @@ const LINK_RULES: Record<SearchRetailer, LinkRule> = {
     re: /<a\b[^>]*href=["'](?:https?:\/\/www\.n11\.com)?(\/urun\/[^"'?#]+)[^"']*["'][^>]*>/gi,
     canonical: m => `https://www.n11.com${m[1]}`,
   },
+  akakce: {
+    // Product pages: /<category>/en-ucuz-<slug>-fiyati,<id>.html
+    re: /<a\b[^>]*href=["'](?:https?:\/\/www\.akakce\.com)?(\/[a-z0-9-]+\/en-ucuz-[^"'?#]+,\d+\.html)[^"']*["'][^>]*>/gi,
+    canonical: m => `https://www.akakce.com${m[1]}`,
+  },
 };
 
 function titleNear(openTag: string, chunk: string): string {
@@ -123,7 +132,9 @@ function priceNear(chunk: string): number | null {
   // Amazon: the a-offscreen span is the clean buy price.
   const off = /<span[^>]*class=["']a-offscreen["'][^>]*>([^<]+)<\/span>/i.exec(chunk);
   if (off) return parsePrice(off[1], { locale: 'tr' });
-  const text = stripTags(chunk);
+  // Akakçe splits decimals into inline tags ("3.266<i>,01 TL</i>"); drop
+  // inline formatting tags without inserting a space.
+  const text = stripTags(chunk.replace(/<\/?(?:i|b|sup|small|em|strong)\b[^>]*>/gi, ''));
   const m = /(\d{1,3}(?:\.\d{3})*(?:,\d{1,2})?|\d+(?:,\d{1,2})?)\s?(?:TL|₺)/i.exec(text);
   return m ? parsePrice(`${m[1]} TL`) : null;
 }
@@ -176,6 +187,8 @@ export function parseSearchResults(
 
 /** Retailers worth searching for a tracker: searchable ones it doesn't already have. */
 export function retailersToSearch(existingUrls: string[]): SearchRetailer[] {
-  const have = new Set(existingUrls.map(u => detectTurkishRetailer(u)).filter(Boolean));
+  const have = new Set<string>(
+    existingUrls.map(u => (isTurkishAggregator(u) ? 'akakce' : detectTurkishRetailer(u))).filter((r): r is NonNullable<typeof r> => r !== null),
+  );
   return SEARCHABLE_RETAILERS.filter(r => !have.has(r));
 }

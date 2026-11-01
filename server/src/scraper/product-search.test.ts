@@ -8,6 +8,7 @@ describe('product search helpers', () => {
     expect(buildSearchUrl('trendyol', 'apex pro')).toBe('https://www.trendyol.com/sr?q=apex%20pro');
     expect(buildSearchUrl('amazon_tr', 'apex pro')).toBe('https://www.amazon.com.tr/s?k=apex%20pro');
     expect(buildSearchUrl('n11', 'apex pro')).toBe('https://www.n11.com/arama?q=apex%20pro');
+    expect(buildSearchUrl('akakce', 'apex pro')).toBe('https://www.akakce.com/arama/?q=apex%20pro');
   });
 
   it('shortens a tracker name into a query', () => {
@@ -21,8 +22,9 @@ describe('product search helpers', () => {
   });
 
   it('skips retailers the tracker already has, never searches Hepsiburada', () => {
-    expect(retailersToSearch(['https://www.amazon.com.tr/dp/B0ABCDEFGH'])).toEqual(['trendyol', 'n11']);
-    expect(retailersToSearch([])).toEqual(['trendyol', 'amazon_tr', 'n11']);
+    expect(retailersToSearch(['https://www.amazon.com.tr/dp/B0ABCDEFGH'])).toEqual(['akakce', 'trendyol', 'n11']);
+    expect(retailersToSearch([])).toEqual(['akakce', 'trendyol', 'amazon_tr', 'n11']);
+    expect(retailersToSearch(['https://www.akakce.com/x/en-ucuz-y-fiyati,1.html'])).toEqual(['trendyol', 'amazon_tr', 'n11']);
   });
 });
 
@@ -63,6 +65,19 @@ describe('parseSearchResults', () => {
         <img></a><div class="priceContainer"><ins>11.750,50 TL</ins></div></li>`;
     const r = parseSearchResults('n11', html, q);
     expect(r[0]).toMatchObject({ url: 'https://www.n11.com/urun/steelseries-apex-pro-tkl-wireless-123', price: 11750.5 });
+  });
+
+  it('Akakçe search results (split decimals)', () => {
+    const html = `
+      <ul id="APL"><li data-pr="1735200190"><a href="/akilli-sensor/en-ucuz-aqara-fp300-matter-fiyati,1735200190.html" title="Aqara FP300 Matter Akıllı Sensör">
+        <img alt="Aqara FP300"></a><span class="pt_v8">3.266<i>,01 TL</i></span> +8 FİYAT</li>
+      <li><a href="/akilli-sensor/en-ucuz-aqara-fp2-fiyati,999.html" title="Aqara FP2 Varlık Sensörü"></a><span class="pt_v8">2.999<i>,00 TL</i></span></li></ul>`;
+    const r = parseSearchResults('akakce', html, 'Aqara FP300 Sensör');
+    expect(r[0]).toMatchObject({
+      url: 'https://www.akakce.com/akilli-sensor/en-ucuz-aqara-fp300-matter-fiyati,1735200190.html',
+      price: 3266.01,
+      score: 1,
+    });
   });
 
   it('returns nothing for an unrelated page', () => {

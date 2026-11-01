@@ -631,7 +631,7 @@ export async function getPublicSavings(): Promise<SavingsSummary> {
 
 // "Diğer sitelerde bul" — candidates for the same product on other retailers.
 export interface FindElsewhereCandidate {
-  retailer: 'trendyol' | 'amazon_tr' | 'n11'
+  retailer: 'akakce' | 'trendyol' | 'amazon_tr' | 'n11'
   title: string
   url: string
   price: number | null
